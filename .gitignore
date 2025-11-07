@@ -1,0 +1,118 @@
+# WordPress
+*.log
+.htaccess
+sitemap.xml
+sitemap.xml.gz
+wp-config.php
+wp-content/advanced-cache.php
+wp-content/backup-db/
+wp-content/backups/
+wp-content/blogs.dir/
+wp-content/cache/
+wp-content/upgrade/
+wp-content/uploads/
+wp-content/mu-plugins/
+wp-content/wp-cache-config.php
+wp-content/plugins/hello.php
+
+# WordPress Themes
+/wp-content/themes/twenty*/
+
+# WP-CLI
+wp-cli.local.yml
+wp-cli.yml
+
+# IDE and Editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.phpintel/
+*.code-workspace
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Build files
+/dist/
+/build/
+*.min.js
+*.min.css
+!assets/js/*.min.js
+!assets/css/*.min.css
+
+# Composer
+/vendor/
+composer.lock
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+error_log
+debug.log
+
+# Test files
+/tests/temp/
+/phpunit.xml
+/.phpunit.result.cache
+
+# Coverage
+/coverage/
+clover.xml
+
+# Deployment
+deploy.sh
+.deployment
+
+# Compressed files (except releases)
+*.zip
+*.tar
+*.tar.gz
+*.rar
+!releases/*.zip
+
+# Documentation build
+/docs/_build/
+
+# Translation files (compiled)
+*.mo
+languages/*.mo
+
+# Cache
+.cache/
+tmp/

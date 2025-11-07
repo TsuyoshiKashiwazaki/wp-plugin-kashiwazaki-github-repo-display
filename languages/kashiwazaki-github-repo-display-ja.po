@@ -1,0 +1,76 @@
+# Translation of Kashiwazaki GitHub Repository Display in Japanese
+# This file is distributed under the same license as the Kashiwazaki GitHub Repository Display package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Kashiwazaki GitHub Repository Display 1.0.0\n"
+"Report-Msgid-Bugs-To: https://www.tsuyoshikashiwazaki.jp/\n"
+"POT-Creation-Date: 2025-10-15 12:00+0000\n"
+"PO-Revision-Date: 2025-10-15 12:00+0000\n"
+"Last-Translator: Tsuyoshi Kashiwazaki\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.0\n"
+
+#: includes/class-github-api.php:72
+msgid "GitHub API rate limit exceeded. Resets at %s."
+msgstr "GitHub APIのレート制限を超過しました。%sにリセットされます。"
+
+#: includes/class-github-api.php:85
+msgid "Repository \"%1$s/%2$s\" not found."
+msgstr "リポジトリ「%1$s/%2$s」が見つかりません。"
+
+#: includes/class-github-api.php:96
+msgid "GitHub API error: HTTP %d"
+msgstr "GitHub APIエラー: HTTP %d"
+
+#: includes/class-github-api.php:104
+msgid "Invalid response from GitHub API."
+msgstr "GitHub APIからの無効な応答です。"
+
+#: includes/class-github-api.php:146
+msgid "README not found."
+msgstr "READMEファイルが見つかりません。"
+
+#: includes/class-repo-display.php:118
+msgid "Unknown"
+msgstr "不明"
+
+#: includes/class-repo-display.php:188
+msgid "Updated %s ago"
+msgstr "%s前に更新"
+
+#: includes/class-repo-display.php:194
+msgid "View on GitHub"
+msgstr "GitHubで見る"
+
+#: includes/class-repo-display.php:196
+msgid "Download"
+msgstr "ダウンロード"
+
+#: includes/class-repo-display.php:200
+msgid "Documentation"
+msgstr "ドキュメント"
+
+#: includes/class-repo-display.php:323
+msgid "Error"
+msgstr "エラー"
+
+#: includes/class-shortcodes.php:73
+msgid "Repository name is required."
+msgstr "リポジトリ名は必須です。"
+
+#: includes/class-shortcodes.php:100
+msgid "Repository names are required (comma-separated)."
+msgstr "リポジトリ名が必要です（カンマ区切り）。"
+
+#: includes/class-shortcodes.php:108
+msgid "No valid repository names provided."
+msgstr "有効なリポジトリ名が指定されていません。"
+
+#: includes/class-shortcodes.php:138
+msgid "Shortcode Error"
+msgstr "ショートコードエラー"

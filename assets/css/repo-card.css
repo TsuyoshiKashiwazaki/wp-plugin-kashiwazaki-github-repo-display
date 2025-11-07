@@ -1,0 +1,515 @@
+/**
+ * Kashiwazaki GitHub Repository Display - Styles
+ *
+ * @package Kashiwazaki_GitHub_Repo_Display
+ */
+
+/* CSS Custom Properties */
+:root {
+	--kgrd-button-text: #ffffff;
+	--kgrd-button-bg: #333333;
+	--kgrd-button-border: #333333;
+	--kgrd-card-border: #dddddd;
+	--kgrd-card-background: #ffffff;
+	--kgrd-text-color: #333333;
+	--kgrd-border-radius: 0px;
+	--kgrd-spacing: 16px;
+	--kgrd-shadow: none;
+	--kgrd-shadow-hover: none;
+	--kgrd-animation: none;
+	--kgrd-hover-transform: none;
+}
+
+/* Card Styles */
+.kgrd-card {
+	background-color: var(--kgrd-card-background);
+	border: 1px solid var(--kgrd-card-border);
+	border-radius: var(--kgrd-border-radius);
+	padding: var(--kgrd-spacing);
+	margin-bottom: calc(var(--kgrd-spacing) * 1.5);
+	box-shadow: var(--kgrd-shadow);
+	transition: box-shadow 0.3s ease, transform 0.2s ease;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+.kgrd-card:hover {
+	box-shadow: var(--kgrd-shadow-hover);
+	transform: var(--kgrd-hover-transform);
+}
+
+/* Card Header */
+.kgrd-card__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: calc(var(--kgrd-spacing) * 0.75);
+	padding-bottom: calc(var(--kgrd-spacing) * 0.75);
+	border-bottom: 1px solid var(--kgrd-card-border);
+}
+
+.kgrd-card__title {
+	margin: 0;
+	font-size: 1.25rem;
+	font-weight: 600;
+	color: var(--kgrd-text-color);
+	line-height: 1.3;
+	flex: 1;
+}
+
+.kgrd-card__repo-link {
+	color: var(--kgrd-text-color);
+	text-decoration: none;
+	transition: color 0.2s ease;
+	flex-shrink: 0;
+	margin-left: var(--kgrd-spacing);
+}
+
+.kgrd-card__repo-link:hover {
+	opacity: 0.7;
+}
+
+.kgrd-card__github-icon {
+	display: block;
+	width: 24px;
+	height: 24px;
+}
+
+/* Card Description */
+.kgrd-card__description {
+	color: var(--kgrd-text-color);
+	font-size: 0.875rem;
+	line-height: 1.5;
+	margin: 0 0 calc(var(--kgrd-spacing) * 0.5);
+}
+
+.kgrd-card__description--github {
+	font-style: italic;
+	opacity: 0.9;
+}
+
+.kgrd-card__description--style-css {
+	margin-bottom: var(--kgrd-spacing);
+}
+
+/* Card Stats */
+.kgrd-card__stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: calc(var(--kgrd-spacing) * 0.75);
+	margin-bottom: var(--kgrd-spacing);
+	padding: calc(var(--kgrd-spacing) * 0.75) 0;
+	border-bottom: 1px solid var(--kgrd-card-border);
+}
+
+.kgrd-card__stat {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 0.75rem;
+	color: var(--kgrd-text-color);
+}
+
+.kgrd-card__stat-icon {
+	width: 16px;
+	height: 16px;
+	color: var(--kgrd-text-color);
+}
+
+.kgrd-card__language {
+	display: inline-block;
+	padding: 2px 8px;
+	background-color: transparent;
+	border: 1px solid var(--kgrd-card-border);
+	border-radius: 12px;
+	font-size: 0.75rem;
+	font-weight: 500;
+	color: var(--kgrd-text-color);
+}
+
+/* Card Badges */
+.kgrd-card__badges {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(100px, max-content));
+	gap: 8px;
+	justify-content: center;
+	margin-bottom: var(--kgrd-spacing);
+	padding: calc(var(--kgrd-spacing) * 0.5);
+	background-color: rgba(0, 0, 0, 0.02);
+	border-radius: 4px;
+}
+
+.kgrd-card__badge {
+	height: 20px;
+	max-width: 100%;
+	vertical-align: middle;
+	justify-self: center;
+}
+
+/* Card Actions */
+.kgrd-card__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: calc(var(--kgrd-spacing) * 0.5);
+}
+
+.kgrd-card__button {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	padding: 8px 16px !important;
+	background-color: var(--kgrd-button-bg);
+	color: var(--kgrd-button-text);
+	border: 1px solid var(--kgrd-button-border);
+	border-radius: var(--kgrd-border-radius) !important;
+	font-size: 0.875rem !important;
+	font-weight: 500 !important;
+	text-decoration: none !important;
+	cursor: pointer !important;
+}
+
+.kgrd-card__button:hover {
+	opacity: 0.8 !important;
+}
+
+.kgrd-card__button--primary,
+.kgrd-card__button--secondary {
+	background-color: var(--kgrd-button-bg);
+	color: var(--kgrd-button-text);
+	border-color: var(--kgrd-button-border);
+}
+
+.kgrd-card__button--primary:hover,
+.kgrd-card__button--secondary:hover {
+	opacity: 0.8 !important;
+}
+
+/* Grid Layout */
+.kgrd-grid {
+	display: grid;
+	gap: calc(var(--kgrd-spacing) * 1.5);
+	margin-bottom: calc(var(--kgrd-spacing) * 1.5);
+}
+
+.kgrd-grid--columns-1 {
+	grid-template-columns: 1fr;
+}
+
+.kgrd-grid--columns-2 {
+	grid-template-columns: repeat(2, 1fr);
+}
+
+.kgrd-grid--columns-3 {
+	grid-template-columns: repeat(3, 1fr);
+}
+
+.kgrd-grid--columns-4 {
+	grid-template-columns: repeat(4, 1fr);
+}
+
+/* Minimal Style */
+.kgrd-minimal {
+	padding: calc(var(--kgrd-spacing) * 0.75);
+	margin-bottom: var(--kgrd-spacing);
+	border-left: 3px solid var(--kgrd-card-border);
+	background-color: var(--kgrd-card-background);
+}
+
+.kgrd-minimal__title {
+	margin: 0 0 8px 0;
+	font-size: 1rem;
+	font-weight: 600;
+}
+
+.kgrd-minimal__title a {
+	color: var(--kgrd-text-color);
+	text-decoration: none;
+}
+
+.kgrd-minimal__title a:hover {
+	opacity: 0.7;
+	text-decoration: underline;
+}
+
+.kgrd-minimal__description {
+	margin: 0;
+	font-size: 0.875rem;
+	color: var(--kgrd-text-color);
+	line-height: 1.5;
+}
+
+/* Badges Only Style */
+.kgrd-badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: var(--kgrd-spacing);
+}
+
+/* Error Styles */
+.kgrd-error {
+	padding: var(--kgrd-spacing);
+	background-color: #fff5f5;
+	border: 1px solid #fc8181;
+	border-left-width: 4px;
+	border-radius: var(--kgrd-border-radius);
+	margin-bottom: var(--kgrd-spacing);
+}
+
+.kgrd-error p {
+	margin: 0;
+	color: #c53030;
+	font-size: 0.875rem;
+}
+
+.kgrd-error strong {
+	font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+	.kgrd-grid--columns-4 {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.kgrd-card__badges {
+		grid-template-columns: repeat(auto-fit, minmax(90px, max-content));
+	}
+}
+
+@media (max-width: 768px) {
+	.kgrd-card {
+		padding: calc(var(--kgrd-spacing) * 0.875);
+	}
+
+	.kgrd-card__title {
+		font-size: 1.125rem;
+	}
+
+	.kgrd-card__header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.kgrd-card__repo-link {
+		margin-left: 0;
+		margin-top: 8px;
+	}
+
+	.kgrd-card__actions {
+		flex-direction: column;
+	}
+
+	.kgrd-card__button {
+		width: 100%;
+		text-align: center;
+	}
+
+	.kgrd-grid--columns-2,
+	.kgrd-grid--columns-3,
+	.kgrd-grid--columns-4 {
+		grid-template-columns: 1fr;
+	}
+
+	.kgrd-card__badges {
+		grid-template-columns: repeat(auto-fit, minmax(85px, 1fr));
+	}
+}
+
+@media (max-width: 480px) {
+	.kgrd-card__stats {
+		flex-direction: column;
+		gap: calc(var(--kgrd-spacing) * 0.5);
+	}
+
+	.kgrd-card__badges {
+		grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+		gap: 6px;
+	}
+}
+
+/* Print Styles */
+@media print {
+	.kgrd-card {
+		box-shadow: none;
+		page-break-inside: avoid;
+	}
+
+	.kgrd-card__button {
+		display: none;
+	}
+}
+
+/* Dark Mode Support (optional) */
+@media (prefers-color-scheme: dark) {
+	:root {
+		--kgrd-primary-color: #58a6ff;
+		--kgrd-secondary-color: #8b949e;
+		--kgrd-border-color: #30363d;
+		--kgrd-background-color: #0d1117;
+		--kgrd-hover-background: #161b22;
+		--kgrd-text-color: #c9d1d9;
+		--kgrd-text-secondary: #8b949e;
+	}
+
+	.kgrd-error {
+		background-color: #2d1b1b;
+		border-color: #f85149;
+	}
+
+	.kgrd-error p {
+		color: #f85149;
+	}
+}
+
+/* Accessibility Improvements */
+.kgrd-card:focus-within {
+	outline: 2px solid var(--kgrd-primary-color);
+	outline-offset: 2px;
+}
+
+.kgrd-card__button:focus {
+	outline: 2px solid var(--kgrd-primary-color);
+	outline-offset: 2px;
+}
+
+/* Animation for card entrance */
+@keyframes kgrd-fade-in {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.kgrd-card {
+	animation: var(--kgrd-animation);
+}
+
+/* Collapsible Component */
+.kgrd-collapsible {
+	margin-top: calc(var(--kgrd-spacing) * 0.5);
+}
+
+.kgrd-collapsible__toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 12px;
+	margin-top: 0;
+	margin-bottom: 0;
+	background-color: transparent;
+	border: 1px solid var(--kgrd-card-border);
+	border-radius: 4px;
+	color: var(--kgrd-text-color);
+	font-size: 0.875rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.kgrd-collapsible__toggle:hover {
+	background-color: var(--kgrd-card-border);
+	opacity: 0.9;
+}
+
+.kgrd-collapsible__toggle:focus {
+	outline: 2px solid var(--kgrd-button-bg);
+	outline-offset: 2px;
+}
+
+.kgrd-collapsible__icon {
+	transition: transform 0.2s ease;
+	flex-shrink: 0;
+}
+
+.kgrd-collapsible__toggle[aria-expanded="true"] .kgrd-collapsible__icon {
+	transform: rotate(180deg);
+}
+
+.kgrd-collapsible__content {
+	overflow: hidden;
+	transition: max-height 0.3s ease;
+}
+
+.kgrd-collapsible__content[hidden] {
+	display: none !important;
+}
+
+.kgrd-collapsible__content:not([hidden]) {
+	display: inline;
+}
+
+/* Special handling for content inside pre tag */
+pre .kgrd-collapsible__content:not([hidden]) {
+	display: inline;
+	animation: none;
+}
+
+@keyframes kgrd-collapse-open {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Readme txt content styles */
+.kgrd-readme-txt {
+	background-color: #f6f8fa;
+	border: 1px solid var(--kgrd-card-border);
+	border-radius: 4px;
+	padding: 16px;
+	margin: 0 0 12px 0;
+	overflow-x: auto;
+	font-family: 'Courier New', Courier, monospace;
+	font-size: 0.813rem;
+	line-height: 1.6;
+	color: var(--kgrd-text-color);
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	max-height: 600px;
+	overflow-y: auto;
+}
+
+.kgrd-readme-more {
+	color: var(--kgrd-text-color);
+	opacity: 0.6;
+}
+
+.kgrd-card__description--readme-txt p {
+	margin: 0 0 1em;
+}
+
+.kgrd-card__description--readme-txt p:last-child {
+	margin-bottom: 0;
+}
+
+.kgrd-card__description--readme-txt strong {
+	font-weight: 600;
+	color: var(--kgrd-text-color);
+}
+
+.kgrd-card__description--readme-txt ul,
+.kgrd-card__description--readme-txt ol {
+	margin: 0 0 1em;
+	padding-left: 1.5em;
+}
+
+.kgrd-card__description--readme-txt li {
+	margin-bottom: 0.25em;
+	line-height: 1.6;
+}
+
+.kgrd-card__description--readme-txt code {
+	padding: 2px 6px;
+	background-color: rgba(0, 0, 0, 0.05);
+	border-radius: 3px;
+	font-family: monospace;
+	font-size: 0.875em;
+}
