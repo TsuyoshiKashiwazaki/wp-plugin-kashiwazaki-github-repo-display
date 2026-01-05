@@ -562,7 +562,6 @@ class KGRD_GitHub_API {
 		$username = sanitize_text_field( $username );
 		$repo     = sanitize_text_field( $repo );
 
-		$url     = sprintf( '%s/repos/%s/%s/tags', $this->api_base, $username, $repo );
 		$headers = array(
 			'Accept' => 'application/vnd.github.v3+json',
 		);
@@ -578,8 +577,27 @@ class KGRD_GitHub_API {
 			}
 		}
 
+		// First, try to get the latest release (most reliable for versioned releases).
+		$release_url = sprintf( '%s/repos/%s/%s/releases/latest', $this->api_base, $username, $repo );
+		$response    = wp_remote_get(
+			$release_url,
+			array(
+				'timeout' => 15,
+				'headers' => $headers,
+			)
+		);
+
+		if ( ! is_wp_error( $response ) && 200 === wp_remote_retrieve_response_code( $response ) ) {
+			$release = json_decode( wp_remote_retrieve_body( $response ), true );
+			if ( ! empty( $release['tag_name'] ) ) {
+				return $release['tag_name'];
+			}
+		}
+
+		// Fallback to tags API if no releases exist.
+		$tags_url = sprintf( '%s/repos/%s/%s/tags', $this->api_base, $username, $repo );
 		$response = wp_remote_get(
-			$url,
+			$tags_url,
 			array(
 				'timeout' => 15,
 				'headers' => $headers,
@@ -613,7 +631,7 @@ class KGRD_GitHub_API {
 			return '';
 		}
 
-		// Return the first tag (latest).
+		// Return the first tag (note: tags API order is not guaranteed to be latest first).
 		return $tags[0]['name'];
 	}
 

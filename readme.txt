@@ -4,7 +4,7 @@ Tags: github, repository, api, shortcode, developer
 Requires at least: 5.0
 Tested up to: 6.4
 Requires PHP: 7.2
-Stable tag: 1.0.0-dev
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,13 +18,19 @@ Display GitHub repository information dynamically on your WordPress site. Simply
 
 * **Easy Integration**: Display any GitHub repository with a simple shortcode
 * **Multiple Display Styles**: Choose from card, minimal, or badges-only styles
+* **Repository Detail Page**: Individual detail pages with full README content display
 * **Automatic Data Fetching**: Retrieves repository information directly from GitHub API
-* **Smart Caching**: Caches API responses to improve performance and reduce API calls
+* **Smart Caching**: 2-layer caching with configurable expiration and jitter
+* **Cache Jitter**: Random variation in cache expiration to prevent cache stampede
+* **WP-Cron Support**: Optional background cache refresh for tracked repositories
 * **README Title Extraction**: Automatically extracts and displays the repository title from README.md
+* **Markdown Rendering**: Full GitHub Flavored Markdown support on detail pages
 * **Responsive Design**: Looks great on all devices and screen sizes
-* **Shields.io Badges**: Automatically displays repository badges (stars, license, last commit)
+* **Shields.io Badges**: Customizable selection of repository badges (16+ types)
 * **Grid Layout Support**: Display multiple repositories in a responsive grid
-* **Customizable**: Multiple filter hooks for customization
+* **Customizable Base Path**: Multi-level URL path support for detail pages
+* **GitHub Token Support**: Optional authentication for higher API rate limits
+* **Customizable**: Multiple filter hooks and admin settings for customization
 * **Dark Mode Support**: Automatically adapts to dark mode preferences
 * **Accessibility**: Keyboard navigation and screen reader friendly
 
@@ -157,6 +163,20 @@ Yes, you can add the shortcodes in a Shortcode block or Classic block in the Gut
 
 == Changelog ==
 
+= 1.0.1 - 2026-01-05 =
+* Added: Repository detail page with full README content display
+* Added: GitHub Flavored Markdown rendering on detail pages
+* Added: Cache jitter feature to prevent cache stampede
+* Added: WP-Cron background cache refresh for tracked repositories
+* Added: GitHub Personal Access Token support for higher API rate limits
+* Added: Customizable detail page base path (supports multi-level paths)
+* Added: Extended badge selection (16+ badge types)
+* Added: New button design with distinct colors (Details=blue, GitHub=dark, Download=green)
+* Changed: Button order and styling for better UX
+* Changed: Download URL now removes .git extension
+* Fixed: Badge layout issue on detail page
+* Fixed: Button colors not applying correctly on list page
+
 = 1.0.0 - 2025-10-15 =
 * Initial release
 * Single repository display shortcode
@@ -171,6 +191,9 @@ Yes, you can add the shortcodes in a Shortcode block or Classic block in the Gut
 * Shields.io badges integration
 
 == Upgrade Notice ==
+
+= 1.0.1 =
+New: Repository detail page, cache jitter, WP-Cron support, improved button design.
 
 = 1.0.0 =
 Initial release of Kashiwazaki GitHub Repository Display.

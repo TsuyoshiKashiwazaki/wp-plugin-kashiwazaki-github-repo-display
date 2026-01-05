@@ -74,3 +74,19 @@ msgstr "有効なリポジトリ名が指定されていません。"
 #: includes/class-shortcodes.php:138
 msgid "Shortcode Error"
 msgstr "ショートコードエラー"
+
+#: includes/class-repo-display.php
+msgid "Details"
+msgstr "詳細"
+
+#: includes/class-repo-detail-page.php
+msgid "Back"
+msgstr "戻る"
+
+#: includes/class-repo-detail-page.php
+msgid "Back to Home"
+msgstr "ホームに戻る"
+
+#: includes/class-repo-detail-page.php
+msgid "Repository Not Found"
+msgstr "リポジトリが見つかりません"

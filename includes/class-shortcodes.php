@@ -91,6 +91,9 @@ class KGRD_Shortcodes {
 			return base64_decode( $cached_output );
 		}
 
+		// Track repository for cron refresh.
+		$this->track_repository( $atts['username'], $atts['repo'] );
+
 		// Display the repository.
 		$display = KGRD_Repo_Display::get_instance();
 		$output = $display->display_repository( $atts['username'], $atts['repo'], $atts['style'], $atts['license'] );
@@ -148,6 +151,11 @@ class KGRD_Shortcodes {
 		if ( false !== $cached_output ) {
 			// Decode base64 encoded content
 			return base64_decode( $cached_output );
+		}
+
+		// Track repositories for cron refresh.
+		foreach ( $repos as $repo ) {
+			$this->track_repository( $atts['username'], $repo );
 		}
 
 		// Display the repositories.
@@ -281,6 +289,13 @@ class KGRD_Shortcodes {
 			);
 		}
 
+		// Track repositories for cron refresh.
+		foreach ( $repos_data as $repo ) {
+			if ( ! empty( $repo['name'] ) ) {
+				$this->track_repository( $username, $repo['name'] );
+			}
+		}
+
 		// Display the repositories using existing grid display.
 		// Pass repository data directly to avoid redundant API calls.
 		$display = KGRD_Repo_Display::get_instance();
@@ -369,5 +384,25 @@ class KGRD_Shortcodes {
 			esc_html__( 'Shortcode Error', 'kashiwazaki-github-repo-display' ),
 			esc_html( $message )
 		);
+	}
+
+	/**
+	 * Track a repository for cron refresh.
+	 *
+	 * @param string $username GitHub username.
+	 * @param string $repo Repository name.
+	 */
+	private function track_repository( $username, $repo ) {
+		$tracked = get_option( 'kgrd_tracked_repositories', array() );
+		$key     = strtolower( $username . '/' . $repo );
+
+		if ( ! isset( $tracked[ $key ] ) ) {
+			$tracked[ $key ] = array(
+				'username'   => $username,
+				'repo'       => $repo,
+				'added_at'   => time(),
+			);
+			update_option( 'kgrd_tracked_repositories', $tracked );
+		}
 	}
 }

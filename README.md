@@ -2,7 +2,7 @@
 
 A powerful WordPress plugin that displays GitHub repository information dynamically on your WordPress site. Simply specify a repository name to fetch and display the latest information from the GitHub API.
 
-![WordPress Plugin Version](https://img.shields.io/badge/version-1.0.0--dev-blue.svg)
+![WordPress Plugin Version](https://img.shields.io/badge/version-1.0.1-blue.svg)
 ![WordPress Compatibility](https://img.shields.io/badge/wordpress-5.0%2B-blue.svg)
 ![PHP Version](https://img.shields.io/badge/php-7.2%2B-purple.svg)
 ![License](https://img.shields.io/badge/license-GPL--2.0%2B-green.svg)
@@ -11,13 +11,19 @@ A powerful WordPress plugin that displays GitHub repository information dynamica
 
 - **Easy Integration**: Display any GitHub repository with a simple shortcode
 - **Multiple Display Styles**: Choose from card, minimal, or badges-only styles
+- **Repository Detail Page**: Individual detail pages with full README content display
 - **Automatic Data Fetching**: Retrieves repository information directly from GitHub API
-- **Smart Caching**: Caches API responses for 6 hours to improve performance
+- **Smart Caching**: Caches API responses with configurable expiration and jitter
+- **Cache Jitter**: Random variation in cache expiration to prevent cache stampede
+- **WP-Cron Support**: Optional background cache refresh for tracked repositories
 - **README Title Extraction**: Automatically extracts and displays the repository title from README.md
+- **Markdown Rendering**: Full GitHub Flavored Markdown support on detail pages
 - **Responsive Design**: Looks great on all devices and screen sizes
-- **Shields.io Badges**: Automatically displays repository badges (stars, license, last commit)
+- **Shields.io Badges**: Customizable selection of repository badges (16+ types available)
 - **Grid Layout Support**: Display multiple repositories in a responsive grid
-- **Customizable**: Multiple filter hooks for customization
+- **Customizable Base Path**: Multi-level URL path support for detail pages (e.g., `tools/software`)
+- **GitHub Token Support**: Optional authentication for higher API rate limits
+- **Customizable**: Multiple filter hooks and admin settings for customization
 - **Dark Mode Support**: Automatically adapts to dark mode preferences
 - **Accessibility**: Keyboard navigation and screen reader friendly
 
@@ -134,9 +140,27 @@ Displays only Shields.io badges:
 
 Navigate to **Settings > GitHub Repo Display** to configure:
 
+### Basic Settings
 - **Default GitHub Username**: Set your default GitHub username
+- **GitHub Personal Access Token**: Optional token for higher API rate limits (60 → 5000 requests/hour)
 - **Cache Expiration**: Adjust cache time (1-24 hours, default: 6)
-- **Cache Management**: Clear all cached repository data
+- **Cache Jitter**: Random variation in cache expiration (10%, 20%, 30%) to prevent cache stampede
+- **WP-Cron Refresh**: Enable automatic background cache refresh for tracked repositories
+- **Detail Page Base Path**: Set custom URL path for detail pages (supports multi-level, e.g., `tools/software`)
+
+### Badge Settings
+Choose which badges to display (16+ types available):
+- **Major badges**: Version, Last Commit, License, Stars, Forks, Issues, Language, Contributors
+- **Minor badges**: Watchers, Open PRs, Closed Issues, Downloads, Code Size, Repo Size, Commit Activity, Release Date
+
+### Design Settings
+- Color customization (buttons, card border, background, text)
+- Layout settings (border radius, spacing)
+- Decoration options (shadow, animation, hover effects)
+
+### Cache Management
+- View cache statistics
+- Clear all cached repository data
 
 ## Customization
 
@@ -205,10 +229,12 @@ kashiwazaki-github-repo-display/
 ├── includes/
 │   ├── class-github-api.php (GitHub API communication)
 │   ├── class-repo-display.php (Display rendering)
-│   └── class-shortcodes.php (Shortcode registration)
+│   ├── class-shortcodes.php (Shortcode registration)
+│   └── class-repo-detail-page.php (Detail page with README display)
 ├── assets/
 │   ├── css/
-│   │   └── repo-card.css (Styles)
+│   │   ├── repo-card.css (Card styles)
+│   │   └── detail-page.css (Detail page styles)
 │   └── js/
 │       └── repo-card.js (JavaScript)
 ├── admin/
@@ -217,7 +243,8 @@ kashiwazaki-github-repo-display/
 │       └── settings-page.php (Settings page template)
 ├── readme.txt (WordPress.org readme)
 ├── README.md (GitHub readme)
-└── CHANGELOG.md (Version history)
+├── CHANGELOG.md (Version history)
+└── examples.md (Usage examples)
 ```
 
 ### Security Features
@@ -230,7 +257,10 @@ kashiwazaki-github-repo-display/
 
 ### Performance Optimization
 
-- Transient API caching (6 hours default)
+- 2-layer caching system (API data + HTML output)
+- Configurable cache expiration (1-24 hours)
+- Cache jitter to prevent cache stampede
+- Optional WP-Cron background cache refresh
 - Conditional asset loading (only when shortcodes are used)
 - Lazy loading for badge images
 - Debounced resize handlers
@@ -307,227 +337,10 @@ GNU General Public License for more details.
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
 
-## Advanced Examples
+## Examples
 
-### Basic Usage Examples
-
-**Display with different styles:**
-
-```
-[kashiwazaki_github_repo repo="wp-theme-backbone-seo-llmo" style="card"]
-[kashiwazaki_github_repo repo="wp-theme-backbone-seo-llmo" style="minimal"]
-[kashiwazaki_github_repo repo="wp-theme-backbone-seo-llmo" style="badges-only"]
-```
-
-**Auto-fetch all user repositories:**
-
-```
-[kashiwazaki_github_user_repos]
-```
-
-**Display with custom filters:**
-
-```
-[kashiwazaki_github_user_repos username="octocat" columns="3" limit="20" exclude_forks="true"]
-```
-
-**Sort by creation date:**
-
-```
-[kashiwazaki_github_user_repos sort="created" direction="asc" limit="10"]
-```
-
-**Portfolio display without forks:**
-
-```
-[kashiwazaki_github_user_repos exclude_forks="true" columns="3" limit="30"]
-```
-
-**Multiple repositories in a grid:**
-
-```
-[kashiwazaki_github_repos repos="project1,project2,project3" columns="2"]
-```
-
-### CSS Customization Examples
-
-**Custom colors:**
-
-```css
-:root {
-    --kgrd-primary-color: #e74c3c;
-    --kgrd-secondary-color: #95a5a6;
-    --kgrd-border-color: #dfe6e9;
-    --kgrd-background-color: #ffffff;
-    --kgrd-border-radius: 8px;
-}
-```
-
-**Dark theme override:**
-
-```css
-.kgrd-card {
-    --kgrd-primary-color: #58a6ff;
-    --kgrd-background-color: #0d1117;
-    --kgrd-text-color: #c9d1d9;
-}
-```
-
-**Custom card styling:**
-
-```css
-.kgrd-card {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.kgrd-card__button--primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-```
-
-### Advanced Filter Examples
-
-**Add custom badges:**
-
-```php
-add_filter('kgrd_badge_urls', function($badge_urls, $data) {
-    $username = $data['owner']['login'];
-    $repo = $data['name'];
-
-    $badge_urls['issues'] = sprintf(
-        'https://img.shields.io/github/issues/%s/%s',
-        $username,
-        $repo
-    );
-
-    return $badge_urls;
-}, 10, 2);
-```
-
-**Filter repositories by language:**
-
-```php
-add_filter('kgrd_repo_card_html', function($html, $data) {
-    $allowed_languages = array('PHP', 'JavaScript');
-
-    if (!in_array($data['language'], $allowed_languages)) {
-        return '';
-    }
-
-    return $html;
-}, 10, 2);
-```
-
-### JavaScript Events
-
-**Track external link clicks:**
-
-```javascript
-jQuery(document).on('kgrd-external-link-click', function(event, data) {
-    console.log('Repository link clicked:', data);
-
-    if (typeof gtag !== 'undefined') {
-        gtag('event', 'click', {
-            'event_category': 'GitHub Repository',
-            'event_label': data.repo
-        });
-    }
-});
-```
-
-### Use Cases
-
-**Portfolio Page:**
-
-```html
-<h1>My GitHub Portfolio</h1>
-<p>Explore all my open source projects:</p>
-
-[kashiwazaki_github_user_repos columns="3" exclude_forks="true" limit="50"]
-```
-
-**Organized by Category:**
-
-```html
-<h2>Themes</h2>
-[kashiwazaki_github_repos repos="theme1,theme2,theme3" columns="3"]
-
-<h2>Plugins</h2>
-[kashiwazaki_github_repos repos="plugin1,plugin2,plugin3" columns="2"]
-```
-
-**Blog Post Integration:**
-
-```html
-<p>I recently released a new WordPress plugin that...</p>
-
-[kashiwazaki_github_repo repo="new-plugin" style="card"]
-```
-
-## Troubleshooting
-
-### Repository Not Displaying
-
-1. Check repository name and username:
-   ```
-   [kashiwazaki_github_repo repo="exact-repo-name" username="exact-username"]
-   ```
-
-2. Verify the repository is public
-
-3. Clear the cache:
-   - Go to Settings > GitHub Repo Display
-   - Click "Clear All Cache"
-
-### Rate Limit Errors
-
-If you're hitting GitHub's rate limit:
-
-1. Increase cache duration:
-   ```php
-   add_filter('kgrd_api_cache_expiration', function() { return 24; });
-   ```
-
-2. Reduce number of repositories displayed
-
-### Styling Issues
-
-1. Check for CSS conflicts:
-   ```css
-   .kgrd-card {
-       all: initial;
-   }
-   ```
-
-2. Increase CSS specificity:
-   ```css
-   body .kgrd-card .kgrd-card__title {
-       /* Your styles */
-   }
-   ```
-
-3. Clear browser cache
-
-## Best Practices
-
-1. **Use caching wisely**: Don't set cache expiration too low (minimum 1 hour recommended)
-
-2. **Choose the right shortcode**:
-   - `[kashiwazaki_github_user_repos]` - Auto-display all repos
-   - `[kashiwazaki_github_repos]` - Specific repos in specific order
-   - `[kashiwazaki_github_repo]` - Single repository feature
-
-3. **Limit repositories per page**: Recommended 12-30 repositories
-
-4. **Choose appropriate styles**:
-   - `card` - Portfolio and feature pages
-   - `minimal` - Sidebars and compact displays
-   - `badges-only` - Quick stats display
-
-5. **Test responsive design**: Use `columns="2"` or `columns="3"` for better mobile experience
-
-6. **Monitor API usage**: GitHub API limit is 60 requests/hour (unauthenticated)
+See [examples.md](examples.md) for detailed usage examples and customization guides.
 
 ---
 
-Made by [Tsuyoshi Kashiwazaki](https://www.tsuyoshikashiwazaki.jp/)
+Made with ❤️ by [Tsuyoshi Kashiwazaki](https://www.tsuyoshikashiwazaki.jp/)

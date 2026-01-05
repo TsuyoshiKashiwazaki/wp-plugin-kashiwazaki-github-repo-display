@@ -250,7 +250,19 @@ class KGRD_Repo_Display {
 		$forks        = isset( $data['forks_count'] ) ? number_format_i18n( $data['forks_count'] ) : '0';
 		$updated      = ! empty( $data['updated_at'] ) ? $this->get_time_diff_english( $data['updated_at'] ) : '';
 		$html_url     = esc_url( $data['html_url'] );
-		$download_url = ! empty( $data['download_url'] ) ? esc_url( $data['download_url'] ) : esc_url( $data['clone_url'] );
+		// Always use proper zip download URL, never clone_url (.git).
+		$username_for_url = ! empty( $data['owner']['login'] ) ? $data['owner']['login'] : '';
+		$repo_for_url     = ! empty( $data['name'] ) ? $data['name'] : '';
+		$default_branch   = ! empty( $data['default_branch'] ) ? $data['default_branch'] : 'main';
+
+		if ( ! empty( $data['download_url'] ) ) {
+			$download_url = esc_url( $data['download_url'] );
+		} elseif ( ! empty( $username_for_url ) && ! empty( $repo_for_url ) ) {
+			// Fallback: construct zip URL from default branch.
+			$download_url = esc_url( sprintf( 'https://github.com/%s/%s/archive/refs/heads/%s.zip', $username_for_url, $repo_for_url, $default_branch ) );
+		} else {
+			$download_url = '';
+		}
 		$license      = ! empty( $data['license']['spdx_id'] ) ? $data['license']['spdx_id'] : 'Unknown';
 
 		// Generate badges.
@@ -337,10 +349,13 @@ class KGRD_Repo_Display {
 						%s
 					</div>
 					<div class="kgrd-card__actions">
-						<a href="%s" class="kgrd-card__button kgrd-card__button--primary" target="_blank" rel="noopener noreferrer">
+						<a href="%s" class="kgrd-card__button kgrd-card__button--details">
 							%s
 						</a>
-						<a href="%s" class="kgrd-card__button kgrd-card__button--secondary" target="_blank" rel="noopener noreferrer">
+						<a href="%s" class="kgrd-card__button kgrd-card__button--github" target="_blank" rel="noopener noreferrer">
+							%s
+						</a>
+						<a href="%s" class="kgrd-card__button kgrd-card__button--download" target="_blank" rel="noopener noreferrer">
 							%s
 						</a>
 					</div>
@@ -357,6 +372,8 @@ class KGRD_Repo_Display {
 				),
 				esc_html( $language ),
 				$badges,
+				esc_url( KGRD_Repo_Detail_Page::get_detail_url( $data['owner']['login'], $data['name'] ) ),
+				esc_html__( 'Details', 'kashiwazaki-github-repo-display' ),
 				$html_url,
 				esc_html__( 'View on GitHub', 'kashiwazaki-github-repo-display' ),
 				$download_url,

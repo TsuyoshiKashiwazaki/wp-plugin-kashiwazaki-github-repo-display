@@ -1,0 +1,329 @@
+/**
+ * Kashiwazaki GitHub Repository Display - Detail Page Styles
+ *
+ * @package Kashiwazaki_GitHub_Repo_Display
+ */
+
+/* Detail Page Navigation */
+.kgrd-detail-nav {
+	margin-bottom: 16px;
+}
+
+.kgrd-back-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	color: #666;
+	text-decoration: none;
+	font-size: 14px;
+	transition: color 0.2s;
+}
+
+.kgrd-back-link:hover {
+	color: #333;
+	text-decoration: none;
+}
+
+/* Detail Page Container */
+.kgrd-detail-page {
+	padding: 20px 0;
+}
+
+.kgrd-detail-container {
+	max-width: 900px;
+	margin: 0 auto;
+	padding: 0 20px;
+}
+
+/* Detail Header */
+.kgrd-detail-header {
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	padding: 24px;
+	margin-bottom: 20px;
+}
+
+.kgrd-detail-title {
+	margin: 0 0 8px 0;
+	font-size: 28px;
+	font-weight: 600;
+	line-height: 1.3;
+}
+
+.kgrd-detail-description {
+	color: #666;
+	margin: 0 0 16px 0;
+	font-size: 16px;
+	line-height: 1.5;
+}
+
+/* Detail Meta */
+.kgrd-detail-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin-bottom: 16px;
+	font-size: 14px;
+	color: #666;
+}
+
+.kgrd-detail-meta span {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+/* Detail Buttons */
+.kgrd-detail-buttons {
+	display: flex;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.kgrd-detail-button {
+	display: inline-block;
+	padding: 10px 20px;
+	background: #333;
+	color: #fff !important;
+	text-decoration: none !important;
+	border-radius: 4px;
+	font-size: 14px;
+	font-weight: 500;
+	transition: background 0.2s;
+}
+
+.kgrd-detail-button:hover {
+	background: #555;
+	color: #fff !important;
+}
+
+.kgrd-detail-button--secondary {
+	background: #6c757d;
+}
+
+.kgrd-detail-button--secondary:hover {
+	background: #5a6268;
+}
+
+/* README Content */
+.kgrd-detail-readme {
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	padding: 32px;
+}
+
+.kgrd-detail-readme h1:first-child,
+.kgrd-detail-readme h2:first-child {
+	margin-top: 0;
+}
+
+.kgrd-detail-readme h1,
+.kgrd-detail-readme h2,
+.kgrd-detail-readme h3,
+.kgrd-detail-readme h4,
+.kgrd-detail-readme h5,
+.kgrd-detail-readme h6 {
+	margin-top: 24px;
+	margin-bottom: 16px;
+	font-weight: 600;
+	line-height: 1.25;
+}
+
+.kgrd-detail-readme h1 {
+	font-size: 2em;
+	padding-bottom: 0.3em;
+	border-bottom: 1px solid #eaecef;
+}
+
+.kgrd-detail-readme h2 {
+	font-size: 1.5em;
+	padding-bottom: 0.3em;
+	border-bottom: 1px solid #eaecef;
+}
+
+.kgrd-detail-readme h3 {
+	font-size: 1.25em;
+}
+
+.kgrd-detail-readme p {
+	margin-bottom: 16px;
+	line-height: 1.6;
+}
+
+.kgrd-detail-readme img {
+	max-width: 100%;
+	height: auto;
+	box-sizing: border-box;
+}
+
+/* Badge images - force horizontal layout */
+.kgrd-detail-readme h1 + p,
+.kgrd-detail-readme .kgrd-badges-container {
+	display: flex !important;
+	flex-wrap: wrap !important;
+	gap: 4px !important;
+	align-items: center !important;
+	justify-content: flex-start !important;
+}
+
+.kgrd-detail-readme h1 + p a,
+.kgrd-detail-readme .kgrd-badges-container a {
+	display: inline-flex !important;
+	flex-shrink: 0 !important;
+	flex-grow: 0 !important;
+}
+
+/* Direct img children (badges without link wrapper) */
+.kgrd-detail-readme h1 + p > img,
+.kgrd-detail-readme .kgrd-badges-container > img {
+	display: inline-flex !important;
+	flex-shrink: 0 !important;
+	flex-grow: 0 !important;
+	height: 20px !important;
+	width: auto !important;
+	margin: 0 !important;
+}
+
+.kgrd-detail-readme h1 + p a img,
+.kgrd-detail-readme .kgrd-badges-container a img {
+	height: 20px !important;
+	width: auto !important;
+}
+
+/* Remove br tags in badge container */
+.kgrd-detail-readme h1 + p br,
+.kgrd-detail-readme .kgrd-badges-container br {
+	display: none !important;
+}
+
+.kgrd-detail-readme pre {
+	background: #f6f8fa;
+	padding: 16px;
+	border-radius: 6px;
+	overflow-x: auto;
+	font-size: 85%;
+	line-height: 1.45;
+	margin-bottom: 16px;
+}
+
+.kgrd-detail-readme code {
+	background: #f6f8fa;
+	padding: 2px 6px;
+	border-radius: 3px;
+	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+	font-size: 85%;
+}
+
+.kgrd-detail-readme pre code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+}
+
+.kgrd-detail-readme table {
+	border-collapse: collapse;
+	width: 100%;
+	margin: 16px 0;
+	overflow: auto;
+}
+
+.kgrd-detail-readme th,
+.kgrd-detail-readme td {
+	border: 1px solid #ddd;
+	padding: 8px 12px;
+	text-align: left;
+}
+
+.kgrd-detail-readme th {
+	background: #f6f8fa;
+	font-weight: 600;
+}
+
+.kgrd-detail-readme blockquote {
+	border-left: 4px solid #ddd;
+	margin: 16px 0;
+	padding: 0 16px;
+	color: #666;
+}
+
+.kgrd-detail-readme ul,
+.kgrd-detail-readme ol {
+	padding-left: 2em;
+	margin-bottom: 16px;
+}
+
+.kgrd-detail-readme li {
+	margin-bottom: 4px;
+}
+
+.kgrd-detail-readme li + li {
+	margin-top: 4px;
+}
+
+.kgrd-detail-readme hr {
+	height: 0.25em;
+	padding: 0;
+	margin: 24px 0;
+	background-color: #e1e4e8;
+	border: 0;
+}
+
+.kgrd-detail-readme a {
+	color: #0366d6;
+	text-decoration: none;
+}
+
+.kgrd-detail-readme a:hover {
+	text-decoration: underline;
+}
+
+/* Error Box */
+.kgrd-error-box {
+	text-align: center;
+	padding: 60px 40px;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	margin: 40px 0;
+}
+
+.kgrd-error-box h1 {
+	color: #333;
+	margin: 0 0 16px 0;
+	font-size: 24px;
+}
+
+.kgrd-error-box p {
+	color: #666;
+	margin: 0 0 24px 0;
+	font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+	.kgrd-detail-container {
+		padding: 0 15px;
+	}
+
+	.kgrd-detail-header {
+		padding: 16px;
+	}
+
+	.kgrd-detail-title {
+		font-size: 22px;
+	}
+
+	.kgrd-detail-readme {
+		padding: 20px;
+	}
+
+	.kgrd-detail-buttons {
+		flex-direction: column;
+	}
+
+	.kgrd-detail-button {
+		text-align: center;
+	}
+}

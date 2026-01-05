@@ -5,6 +5,47 @@ All notable changes to the Kashiwazaki GitHub Repository Display plugin will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-01-05
+
+### Added
+
+#### Repository Detail Page
+- Individual detail page for each repository with full README content display
+- GitHub Flavored Markdown rendering (via GitHub API or Parsedown fallback)
+- Automatic relative URL fixing for images and links
+- Detail page caching with configurable expiration
+
+#### Cache Improvements
+- Cache jitter feature to prevent cache stampede (10%, 20%, 30% options)
+- WP-Cron background cache refresh for tracked repositories
+- Repository tracking system (automatically tracks displayed repositories)
+- Configurable cron interval (1-24 hours)
+
+#### Admin Settings
+- GitHub Personal Access Token field for higher API rate limits
+- Customizable detail page base path (supports multi-level paths like `tools/software`)
+- Cache jitter settings
+- WP-Cron refresh settings with status display
+- Extended badge selection (16+ badge types)
+
+#### Button Design
+- New button design system with distinct colors for each action
+- "Details" button (blue) - links to detail page
+- "View on GitHub" button (dark) - links to GitHub repository
+- "Download" button (green) - downloads ZIP file
+
+### Changed
+- Button order and styling updated for better UX
+- Download URL now removes `.git` extension from clone URLs
+- Improved badge layout with better horizontal alignment
+
+### Fixed
+- Badge layout issue on detail page where badges were split across the line
+- Button colors not applying correctly on list page due to CSS specificity
+- CSS `margin: auto` causing badge misalignment on certain themes
+
+---
+
 ## [1.0.0] - 2025-10-15
 
 ### Added
@@ -165,6 +206,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History
 
+- **1.0.1** - 2026-01-05 - Repository detail page, cache jitter, WP-Cron support, button redesign
 - **1.0.0** - 2025-10-15 - Initial release
 
 ---
@@ -180,5 +222,6 @@ Developed by [Tsuyoshi Kashiwazaki](https://www.tsuyoshikashiwazaki.jp/)
 
 ---
 
+[1.0.1]: https://github.com/TsuyoshiKashiwazaki/kashiwazaki-github-repo-display/releases/tag/1.0.1
 [1.0.0]: https://github.com/TsuyoshiKashiwazaki/kashiwazaki-github-repo-display/releases/tag/1.0.0
-[Unreleased]: https://github.com/TsuyoshiKashiwazaki/kashiwazaki-github-repo-display/compare/1.0.0...HEAD
+[Unreleased]: https://github.com/TsuyoshiKashiwazaki/kashiwazaki-github-repo-display/compare/1.0.1...HEAD

@@ -157,30 +157,76 @@
 	align-items: center !important;
 	justify-content: center !important;
 	padding: 8px 16px !important;
-	background-color: var(--kgrd-button-bg);
-	color: var(--kgrd-button-text);
-	border: 1px solid var(--kgrd-button-border);
 	border-radius: var(--kgrd-border-radius) !important;
 	font-size: 0.875rem !important;
 	font-weight: 500 !important;
 	text-decoration: none !important;
 	cursor: pointer !important;
+	transition: all 0.2s ease !important;
 }
 
-.kgrd-card__button:hover {
-	opacity: 0.8 !important;
+/* Details Button - Blue/Teal prominent style */
+.kgrd-card__button--details {
+	background-color: #0969da !important;
+	color: #ffffff !important;
+	border: 1px solid #0969da !important;
 }
 
-.kgrd-card__button--primary,
-.kgrd-card__button--secondary {
+.kgrd-card__button--details:hover {
+	background-color: #0550ae !important;
+	border-color: #0550ae !important;
+	color: #ffffff !important;
+}
+
+/* View on GitHub Button - Dark with GitHub style */
+.kgrd-card__button--github {
+	background-color: #24292f !important;
+	color: #ffffff !important;
+	border: 1px solid #24292f !important;
+}
+
+.kgrd-card__button--github:hover {
+	background-color: #32383f !important;
+	border-color: #32383f !important;
+	color: #ffffff !important;
+}
+
+/* Download Button - Green style */
+.kgrd-card__button--download {
+	background-color: #1a7f37 !important;
+	color: #ffffff !important;
+	border: 1px solid #1a7f37 !important;
+}
+
+.kgrd-card__button--download:hover {
+	background-color: #116329 !important;
+	border-color: #116329 !important;
+	color: #ffffff !important;
+}
+
+/* Legacy button styles for backwards compatibility */
+.kgrd-card__button--primary {
 	background-color: var(--kgrd-button-bg);
 	color: var(--kgrd-button-text);
-	border-color: var(--kgrd-button-border);
+	border: 1px solid var(--kgrd-button-border);
+}
+
+.kgrd-card__button--secondary {
+	background-color: #6c757d;
+	color: #ffffff;
+	border: 1px solid #6c757d;
+}
+
+.kgrd-card__button--tertiary {
+	background-color: #6c757d;
+	color: #ffffff;
+	border: 1px solid #6c757d;
 }
 
 .kgrd-card__button--primary:hover,
-.kgrd-card__button--secondary:hover {
-	opacity: 0.8 !important;
+.kgrd-card__button--secondary:hover,
+.kgrd-card__button--tertiary:hover {
+	opacity: 0.85 !important;
 }
 
 /* Grid Layout */

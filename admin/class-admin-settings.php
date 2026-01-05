@@ -146,6 +146,36 @@ class KGRD_Admin_Settings {
 			)
 		);
 
+		register_setting(
+			'kgrd_general_group',
+			'kgrd_enable_cron_refresh',
+			array(
+				'type'              => 'boolean',
+				'sanitize_callback' => array( $this, 'sanitize_cron_checkbox' ),
+				'default'           => 0,
+			)
+		);
+
+		register_setting(
+			'kgrd_general_group',
+			'kgrd_cron_interval',
+			array(
+				'type'              => 'integer',
+				'sanitize_callback' => array( $this, 'sanitize_cron_interval' ),
+				'default'           => 6,
+			)
+		);
+
+		register_setting(
+			'kgrd_general_group',
+			'kgrd_detail_base_path',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => array( $this, 'sanitize_base_path' ),
+				'default'           => 'software',
+			)
+		);
+
 		// バッジ設定
 		$badge_types = array(
 			// メジャー（デフォルトON）
@@ -262,6 +292,22 @@ class KGRD_Admin_Settings {
 			'kgrd_cache_jitter',
 			'キャッシュ更新タイミングの分散（Jitter）',
 			array( $this, 'render_jitter_field' ),
+			'kgrd-general',
+			'kgrd_general_section'
+		);
+
+		add_settings_field(
+			'kgrd_cron_refresh',
+			'キャッシュ自動更新（Cron）',
+			array( $this, 'render_cron_field' ),
+			'kgrd-general',
+			'kgrd_general_section'
+		);
+
+		add_settings_field(
+			'kgrd_detail_base_path',
+			'詳細ページのベースパス',
+			array( $this, 'render_base_path_field' ),
 			'kgrd-general',
 			'kgrd_general_section'
 		);
@@ -498,6 +544,91 @@ class KGRD_Admin_Settings {
 			複数のリポジトリのキャッシュ更新タイミングをずらすことで、ページロード時の負荷を軽減します。<br>
 			<strong>現在の設定：</strong> <?php echo esc_html( $cache_hours ); ?>時間 + <?php echo esc_html( $jitter_percent ); ?>%分散
 			→ <strong><?php echo esc_html( number_format( $min_hours, 1 ) ); ?>〜<?php echo esc_html( number_format( $max_hours, 1 ) ); ?>時間</strong>の範囲でランダムに期限切れ
+		</p>
+		<?php
+	}
+
+	/**
+	 * Render cron refresh field.
+	 */
+	public function render_cron_field() {
+		$enable_cron   = get_option( 'kgrd_enable_cron_refresh', 0 );
+		$cron_interval = get_option( 'kgrd_cron_interval', 6 );
+		$tracked_repos = get_option( 'kgrd_tracked_repositories', array() );
+		$last_refresh  = get_option( 'kgrd_last_cron_refresh', 0 );
+		$next_scheduled = wp_next_scheduled( 'kgrd_cache_refresh_event' );
+		?>
+		<fieldset>
+			<label style="display: block; margin-bottom: 12px;">
+				<input
+					type="checkbox"
+					name="kgrd_enable_cron_refresh"
+					value="1"
+					<?php checked( 1, $enable_cron ); ?>
+				/>
+				WP-Cronによるキャッシュ自動更新を有効化
+			</label>
+
+			<div style="margin-left: 24px; margin-top: 12px;">
+				<label style="display: block; margin-bottom: 8px;">
+					<strong>更新間隔：</strong>
+					<input
+						type="number"
+						name="kgrd_cron_interval"
+						value="<?php echo esc_attr( $cron_interval ); ?>"
+						min="1"
+						max="24"
+						class="small-text"
+						style="width: 60px;"
+					/> 時間ごと
+				</label>
+			</div>
+		</fieldset>
+
+		<div style="margin-top: 16px; padding: 12px; background: #f0f0f1; border-radius: 4px;">
+			<p style="margin: 0 0 8px 0;"><strong>ステータス：</strong></p>
+			<ul style="margin: 0; padding-left: 20px;">
+				<li>追跡中のリポジトリ: <strong><?php echo count( $tracked_repos ); ?></strong> 件</li>
+				<?php if ( $last_refresh ) : ?>
+					<li>最終自動更新: <strong><?php echo esc_html( date_i18n( 'Y-m-d H:i:s', $last_refresh ) ); ?></strong></li>
+				<?php else : ?>
+					<li>最終自動更新: <strong>未実行</strong></li>
+				<?php endif; ?>
+				<?php if ( $next_scheduled ) : ?>
+					<li>次回予定: <strong><?php echo esc_html( date_i18n( 'Y-m-d H:i:s', $next_scheduled ) ); ?></strong></li>
+				<?php elseif ( $enable_cron ) : ?>
+					<li>次回予定: <strong>スケジュール設定中...</strong>（設定保存後に有効化）</li>
+				<?php else : ?>
+					<li>次回予定: <strong>無効</strong></li>
+				<?php endif; ?>
+			</ul>
+		</div>
+
+		<p class="description" style="margin-top: 12px;">
+			バックグラウンドで定期的にキャッシュを更新し、ユーザーアクセス時の負荷を軽減します。<br>
+			ショートコードで表示されたリポジトリが自動的に追跡リストに追加されます。
+		</p>
+		<?php
+	}
+
+	/**
+	 * Render base path field for detail pages.
+	 */
+	public function render_base_path_field() {
+		$base_path = get_option( 'kgrd_detail_base_path', 'software' );
+		?>
+		<input
+			type="text"
+			id="kgrd_detail_base_path"
+			name="kgrd_detail_base_path"
+			value="<?php echo esc_attr( $base_path ); ?>"
+			class="regular-text"
+			placeholder="software"
+		/>
+		<p class="description">
+			詳細ページのURLのベースパスを設定します。複数階層も可能です（例: <code>tools/software</code>）<br>
+			現在のURL例: <code><?php echo esc_html( home_url( '/' . $base_path . '/リポジトリ名/' ) ); ?></code><br>
+			変更後はパーマリンク設定を更新してください（設定 → パーマリンク → 変更を保存）。
 		</p>
 		<?php
 	}
@@ -745,6 +876,73 @@ class KGRD_Admin_Settings {
 	}
 
 	/**
+	 * Sanitize cron checkbox and reschedule event.
+	 *
+	 * @param mixed $value Input value.
+	 * @return int Sanitized value.
+	 */
+	public function sanitize_cron_checkbox( $value ) {
+		$sanitized = ! empty( $value ) ? 1 : 0;
+
+		// Schedule reschedule on next request.
+		add_action( 'shutdown', array( 'Kashiwazaki_GitHub_Repo_Display', 'reschedule_cron_event' ) );
+
+		return $sanitized;
+	}
+
+	/**
+	 * Sanitize cron interval value.
+	 *
+	 * @param mixed $value Input value.
+	 * @return int Sanitized value.
+	 */
+	public function sanitize_cron_interval( $value ) {
+		$value = absint( $value );
+		$value = max( 1, min( 24, $value ) );
+
+		// Schedule reschedule on next request.
+		add_action( 'shutdown', array( 'Kashiwazaki_GitHub_Repo_Display', 'reschedule_cron_event' ) );
+
+		return $value;
+	}
+
+	/**
+	 * Sanitize base path for detail pages.
+	 * Supports multiple directory levels (e.g., "tools/software").
+	 *
+	 * @param mixed $value Input value.
+	 * @return string Sanitized value.
+	 */
+	public function sanitize_base_path( $value ) {
+		// Remove leading/trailing slashes.
+		$value = trim( $value, '/' );
+
+		// Split by slash and sanitize each segment.
+		$segments = explode( '/', $value );
+		$sanitized_segments = array();
+
+		foreach ( $segments as $segment ) {
+			$segment = sanitize_title( $segment );
+			if ( ! empty( $segment ) ) {
+				$sanitized_segments[] = $segment;
+			}
+		}
+
+		// Rejoin with slashes.
+		$value = implode( '/', $sanitized_segments );
+
+		// Default to 'software' if empty.
+		if ( empty( $value ) ) {
+			$value = 'software';
+		}
+
+		// Flush rewrite rules on next page load.
+		delete_option( 'rewrite_rules' );
+
+		return $value;
+	}
+
+	/**
 	 * Handle cache clearing request.
 	 */
 	public function handle_clear_cache() {
@@ -819,9 +1017,10 @@ class KGRD_Admin_Settings {
 
 		?>
 		<style type="text/css" id="kgrd-custom-styles">
-			.kgrd-card__button,
+			/* Legacy button styles - exclude new typed buttons */
 			.kgrd-card__button--primary,
-			.kgrd-card__button--secondary {
+			.kgrd-card__button--secondary,
+			.kgrd-card__button--tertiary {
 				background-color: <?php echo esc_attr( $button_bg ); ?> !important;
 				color: <?php echo esc_attr( $button_text ); ?> !important;
 				border-color: <?php echo esc_attr( $button_border ); ?> !important;
