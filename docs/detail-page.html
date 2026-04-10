@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>詳細ページ機能 - Kashiwazaki GitHub Repository Display マニュアル</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<button class="hamburger-btn" aria-label="メニューを開く">&#9776;</button>
+
+<nav class="sidebar">
+    <div class="sidebar-header">
+        <h2 style="color:#fff;">GitHub Repo Display</h2>
+        <span class="version">v1.0.1</span>
+        <img src="images/main-visual.png" alt="" style="width:100%;border-radius:4px;margin-top:8px;">
+    </div>
+    <ul>
+        <li><a href="index.html">概要</a></li>
+        <li><a href="setup.html">インストール・初期設定</a></li>
+        <li><a href="shortcodes.html">ショートコード</a></li>
+        <li><a href="customization.html">カスタマイズ</a></li>
+        <li class="active"><a href="detail-page.html">詳細ページ機能</a></li>
+        <li><a href="troubleshooting.html">トラブルシューティング</a></li>
+    </ul>
+</nav>
+
+<main class="content">
+    <h1>詳細ページ機能</h1>
+    <p class="lead">リポジトリごとに固有のパーマリンクを持つ詳細ページを自動生成し、README.mdをHTMLレンダリング、GitHub Pagesへのリンクも自動追加します。</p>
+
+    <div class="screenshot"><img src="images/screenshots/06-detail-page.png" alt="詳細ページの表示例" class="lightbox-trigger"></div>
+    <p>図: <code>wp-plugin-kashiwazaki-seo-breadcrumbs</code> の詳細ページ。ヘッダーの Source / ZIP Download / Docs ボタンの下に README.md のレンダリング結果が続きます</p>
+
+    <h2>URLの仕組み</h2>
+    <p>詳細ページのURLは <code>/{ベースパス}/{リポジトリ名}/</code> 形式で生成されます。</p>
+
+    <div class="callout callout-note">
+        <p>ベースパスは管理画面「基本設定」→「詳細ページのベースパス」で変更可能です。デフォルトは <code>software</code>。<code>tools/plugins</code> のように多階層も指定できます。</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ベースパス</th>
+                <th>リポジトリ名</th>
+                <th>生成されるURL</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>software</td>
+                <td>wp-plugin-my-tool</td>
+                <td>/software/wp-plugin-my-tool/</td>
+            </tr>
+            <tr>
+                <td>tools</td>
+                <td>my-utility</td>
+                <td>/tools/my-utility/</td>
+            </tr>
+            <tr>
+                <td>dev/projects</td>
+                <td>awesome-lib</td>
+                <td>/dev/projects/awesome-lib/</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="callout callout-warning">
+        <p>ベースパスを変更した場合、または追跡対象リポジトリが増えた場合は、WordPress 管理画面「設定 → パーマリンク」で「変更を保存」をクリックしてリライトルールをフラッシュしてください。これを忘れると詳細ページが 404 になります。</p>
+    </div>
+
+    <h2>表示内容</h2>
+    <div class="feature-cards">
+        <div class="feature-card">
+            <h3>ヘッダー情報</h3>
+            <p>リポジトリ名・説明・メタ情報（言語・スター数・フォーク数・ライセンス）を上部に表示します。</p>
+        </div>
+        <div class="feature-card">
+            <h3>アクションボタン</h3>
+            <p>Source（GitHub）・ZIP Download（最新リリース or ブランチ）・Docs（GitHub Pages、有効時のみ）の3種類のボタンを自動生成します。</p>
+        </div>
+        <div class="feature-card">
+            <h3>README レンダリング</h3>
+            <p>README.md を Parsedown or GitHub Markdown API でHTML化し、画像・リンクの相対URLは GitHub の生データに自動解決します。</p>
+        </div>
+    </div>
+
+    <h2>Markdown レンダリング</h2>
+    <p>README.md のレンダリングには以下の優先順位でパーサーが選択されます。</p>
+
+    <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-body">
+            <p><strong>Parsedown クラスが存在すれば使用（セーフモード）</strong></p>
+        </div>
+    </div>
+    <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-body">
+            <p><strong>GitHub API の <code>/markdown</code> エンドポイントにPOST</strong></p>
+        </div>
+    </div>
+    <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-body">
+            <p><strong>ベーシックな正規表現ベースのフォールバック</strong></p>
+        </div>
+    </div>
+
+    <div class="callout callout-tip">
+        <p>サーバーに Parsedown ライブラリ（<code>composer require erusev/parsedown</code>）をインストールしておくと、GitHub APIを消費せずに高速にMarkdownをレンダリングできます。未インストールの場合はGitHub APIが使われますが、レート制限の対象になります。</p>
+    </div>
+
+    <h3>画像・リンクの相対パス</h3>
+    <p>README.md内の相対パスは自動的にGitHubの正しいURLに変換されます。</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>要素</th>
+                <th>元の相対パス</th>
+                <th>変換後のURL</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>画像</td>
+                <td><code>./docs/screenshot.png</code></td>
+                <td><code>https://raw.githubusercontent.com/{owner}/{repo}/HEAD/docs/screenshot.png</code></td>
+            </tr>
+            <tr>
+                <td>リンク</td>
+                <td><code>./CHANGELOG.md</code></td>
+                <td><code>https://github.com/{owner}/{repo}/blob/HEAD/CHANGELOG.md</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>GitHub Pages 自動検出</h2>
+    <p>GitHub API の <code>has_pages</code> フラグが true のリポジトリには、カード表示と詳細ページの両方に「Docs」ボタンが自動追加されます。</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>リポジトリの状態</th>
+                <th>生成されるURL</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>通常のプロジェクト Pages</td>
+                <td><code>https://{owner}.github.io/{repo}/</code></td>
+            </tr>
+            <tr>
+                <td>リポジトリ名が <code>{owner}.github.io</code> のユーザーサイト</td>
+                <td><code>https://{owner}.github.io/</code></td>
+            </tr>
+            <tr>
+                <td>has_pages=false</td>
+                <td>ボタン非表示</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="callout callout-note">
+        <p>ボタンのラベル（デフォルト: Docs）は管理画面「基本設定」→「ボタンラベル」で変更できます。プロジェクトによって Demo や Site などに変更しても構いません。</p>
+    </div>
+
+    <nav class="page-nav">
+        <a href="customization.html" class="prev">&laquo; カスタマイズ</a>
+        <a href="troubleshooting.html" class="next">トラブルシューティング &raquo;</a>
+    </nav>
+
+    <footer class="manual-footer">
+        <p>作者: <a href="https://www.tsuyoshikashiwazaki.jp/" target="_blank" rel="noopener">柏崎剛（Tsuyoshi Kashiwazaki）</a></p>
+        <p>プラグイン: Kashiwazaki GitHub Repository Display v1.0.1</p>
+    </footer>
+</main>
+
+<div class="lightbox"></div>
+<script src="js/manual.js"></script>
+</body>
+</html>

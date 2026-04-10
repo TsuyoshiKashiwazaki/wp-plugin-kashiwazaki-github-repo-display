@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ショートコード リファレンス - Kashiwazaki GitHub Repository Display マニュアル</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<button class="hamburger-btn" aria-label="メニューを開く">&#9776;</button>
+
+<nav class="sidebar">
+    <div class="sidebar-header">
+        <h2 style="color:#fff;">GitHub Repo Display</h2>
+        <span class="version">v1.0.1</span>
+        <img src="images/main-visual.png" alt="" style="width:100%;border-radius:4px;margin-top:8px;">
+    </div>
+    <ul>
+        <li><a href="index.html">概要</a></li>
+        <li><a href="setup.html">インストール・初期設定</a></li>
+        <li><a href="shortcodes.html">ショートコード</a></li>
+        <li><a href="customization.html">カスタマイズ</a></li>
+        <li><a href="detail-page.html">詳細ページ機能</a></li>
+        <li><a href="troubleshooting.html">トラブルシューティング</a></li>
+    </ul>
+</nav>
+
+<main class="content">
+    <h1>ショートコード リファレンス</h1>
+    <p class="lead">3種類のショートコードでGitHubリポジトリを柔軟に表示できます。属性の組み合わせでレイアウトや取得対象を自由に調整可能です。</p>
+
+    <div class="screenshot"><img src="images/screenshots/05-frontend-cards.png" alt="フロントエンドに表示されたリポジトリカード" class="lightbox-trigger"></div>
+    <p>図: <code>[kashiwazaki_github_user_repos]</code> でTsuyoshiKashiwazaki のリポジトリを一覧表示した例。各カードには Details / Source / ZIP Download / Docs（GitHub Pages有効時のみ）の4つのアクションボタンが並びます。</p>
+
+    <h2>ショートコード一覧</h2>
+
+    <h3><code>[kashiwazaki_github_repo]</code> — 単一リポジトリ表示</h3>
+    <p>1つのリポジトリのカードを表示します。</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>属性</th>
+                <th>型</th>
+                <th>デフォルト</th>
+                <th>必須</th>
+                <th>説明</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>repo</td>
+                <td>string</td>
+                <td>（なし）</td>
+                <td>YES</td>
+                <td>リポジトリ名（例: <code>my-plugin</code>）</td>
+            </tr>
+            <tr>
+                <td>username</td>
+                <td>string</td>
+                <td>kgrd_default_username オプション値</td>
+                <td>NO</td>
+                <td>GitHubユーザー名（省略時は管理画面の既定値）</td>
+            </tr>
+            <tr>
+                <td>style</td>
+                <td>string</td>
+                <td><code>card</code></td>
+                <td>NO</td>
+                <td>表示スタイル: <code>card</code> / <code>minimal</code> / <code>badges-only</code></td>
+            </tr>
+            <tr>
+                <td>license</td>
+                <td>string</td>
+                <td>（空）</td>
+                <td>NO</td>
+                <td>ライセンス表示の手動上書き</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <pre><code>[kashiwazaki_github_repo repo="wp-plugin-kashiwazaki-seo-breadcrumbs"]
+[kashiwazaki_github_repo repo="my-tool" username="octocat" style="minimal"]</code></pre>
+
+    <h3><code>[kashiwazaki_github_repos]</code> — 複数指定表示</h3>
+    <p>カンマ区切りで複数のリポジトリを指定してグリッド表示します。</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>属性</th>
+                <th>型</th>
+                <th>デフォルト</th>
+                <th>必須</th>
+                <th>説明</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>repos</td>
+                <td>string</td>
+                <td>（なし）</td>
+                <td>YES</td>
+                <td>カンマ区切りのリポジトリ名（例: <code>repo1,repo2,repo3</code>）</td>
+            </tr>
+            <tr>
+                <td>username</td>
+                <td>string</td>
+                <td>既定ユーザー名</td>
+                <td>NO</td>
+                <td>対象のGitHubユーザー名</td>
+            </tr>
+            <tr>
+                <td>columns</td>
+                <td>integer</td>
+                <td>2</td>
+                <td>NO</td>
+                <td>グリッド列数（1〜4）</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <pre><code>[kashiwazaki_github_repos repos="plugin-a,plugin-b,plugin-c" columns="3"]</code></pre>
+
+    <h3><code>[kashiwazaki_github_user_repos]</code> — ユーザー全リポジトリ</h3>
+    <p>指定ユーザーの全リポジトリを自動取得してグリッド表示します。</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>属性</th>
+                <th>型</th>
+                <th>デフォルト</th>
+                <th>必須</th>
+                <th>説明</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>username</td>
+                <td>string</td>
+                <td>既定ユーザー名</td>
+                <td>NO</td>
+                <td>対象のGitHubユーザー名</td>
+            </tr>
+            <tr>
+                <td>columns</td>
+                <td>integer</td>
+                <td>2</td>
+                <td>NO</td>
+                <td>グリッド列数（1〜4）</td>
+            </tr>
+            <tr>
+                <td>limit</td>
+                <td>integer</td>
+                <td>30</td>
+                <td>NO</td>
+                <td>取得件数上限（1〜100）</td>
+            </tr>
+            <tr>
+                <td>sort</td>
+                <td>string</td>
+                <td><code>updated</code></td>
+                <td>NO</td>
+                <td>ソート: <code>created</code> / <code>updated</code> / <code>pushed</code> / <code>full_name</code></td>
+            </tr>
+            <tr>
+                <td>direction</td>
+                <td>string</td>
+                <td><code>desc</code></td>
+                <td>NO</td>
+                <td>昇順/降順: <code>asc</code> / <code>desc</code></td>
+            </tr>
+            <tr>
+                <td>type</td>
+                <td>string</td>
+                <td><code>owner</code></td>
+                <td>NO</td>
+                <td>取得タイプ: <code>all</code> / <code>owner</code> / <code>public</code> / <code>private</code> / <code>member</code></td>
+            </tr>
+            <tr>
+                <td>exclude_forks</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>NO</td>
+                <td>フォークしたリポジトリを除外</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <pre><code>[kashiwazaki_github_user_repos username="TsuyoshiKashiwazaki" columns="3" limit="100" exclude_forks="true"]</code></pre>
+
+    <h2>表示スタイル</h2>
+    <p>すべてのショートコードで共通して使える3つの表示スタイルを用意しています。用途に応じて使い分けてください。</p>
+
+    <div class="feature-cards">
+        <div class="feature-card">
+            <h3>Card</h3>
+            <p>フルカード表示。タイトル・説明・バッジ・統計・4ボタンをすべて表示する標準スタイルです。デフォルトで使用されます。</p>
+        </div>
+        <div class="feature-card">
+            <h3>Minimal</h3>
+            <p>タイトルと説明だけの軽量表示。本文中にさりげなくリポジトリを紹介したいときに最適です。</p>
+        </div>
+        <div class="feature-card">
+            <h3>Badges-only</h3>
+            <p>shields.ioバッジのみの最小表示。README的にバッジだけを並べたいときに使用します。</p>
+        </div>
+    </div>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">ヒント</div>
+        <p>ショートコードの出力はトランジェントキャッシュ（既定6時間）に保存されます。GitHub APIへのアクセスは初回のみ、2回目以降はキャッシュから返されるためページ表示が高速です。</p>
+    </div>
+
+    <div class="callout callout-note">
+        <div class="callout-title">補足</div>
+        <p>各ショートコードは表示時に自動で「追跡対象リポジトリ」に登録されます。この登録は詳細ページ機能（permalink-based detail pages）とCron自動更新で使用されます。</p>
+    </div>
+
+    <nav class="page-nav">
+        <a href="setup.html" class="prev">&laquo; インストール・初期設定</a>
+        <a href="customization.html" class="next">カスタマイズ &raquo;</a>
+    </nav>
+
+    <footer class="manual-footer">
+        <p>作者: <a href="https://www.tsuyoshikashiwazaki.jp/" target="_blank" rel="noopener">柏崎剛（Tsuyoshi Kashiwazaki）</a></p>
+        <p>プラグイン: Kashiwazaki GitHub Repository Display v1.0.1</p>
+    </footer>
+</main>
+
+<div class="lightbox"></div>
+<script src="js/manual.js"></script>
+</body>
+</html>

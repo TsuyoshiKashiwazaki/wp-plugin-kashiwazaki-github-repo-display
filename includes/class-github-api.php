@@ -636,6 +636,38 @@ class KGRD_GitHub_API {
 	}
 
 	/**
+	 * Build the GitHub Pages URL for a repository if Pages is enabled.
+	 *
+	 * Uses the `has_pages` flag returned by the GitHub REST API. Custom domains
+	 * still work because GitHub redirects the canonical `*.github.io` URL.
+	 *
+	 * @param array $data Repository data from GitHub API.
+	 * @return string Pages URL or empty string if not available.
+	 */
+	public static function get_pages_url( $data ) {
+		if ( empty( $data['has_pages'] ) ) {
+			return '';
+		}
+
+		$owner = ! empty( $data['owner']['login'] ) ? $data['owner']['login'] : '';
+		$name  = ! empty( $data['name'] ) ? $data['name'] : '';
+
+		if ( empty( $owner ) || empty( $name ) ) {
+			return '';
+		}
+
+		$owner_lc = strtolower( $owner );
+
+		// User/Organization site: repo named "<owner>.github.io".
+		if ( strcasecmp( $name, $owner . '.github.io' ) === 0 ) {
+			return sprintf( 'https://%s.github.io/', $owner_lc );
+		}
+
+		// Project site.
+		return sprintf( 'https://%s.github.io/%s/', $owner_lc, $name );
+	}
+
+	/**
 	 * Get cache key for a repository.
 	 *
 	 * @param string $username GitHub username.

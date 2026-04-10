@@ -106,6 +106,14 @@
 	background: #5a6268;
 }
 
+.kgrd-detail-button--pages {
+	background: #8250df;
+}
+
+.kgrd-detail-button--pages:hover {
+	background: #6639ba;
+}
+
 /* README Content */
 .kgrd-detail-readme {
 	background: #fff;

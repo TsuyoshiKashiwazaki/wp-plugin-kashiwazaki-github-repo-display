@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>トラブルシューティング - Kashiwazaki GitHub Repository Display マニュアル</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<button class="hamburger-btn" aria-label="メニューを開く">&#9776;</button>
+
+<nav class="sidebar">
+    <div class="sidebar-header">
+        <h2 style="color:#fff;">GitHub Repo Display</h2>
+        <span class="version">v1.0.1</span>
+        <img src="images/main-visual.png" alt="" style="width:100%;border-radius:4px;margin-top:8px;">
+    </div>
+    <ul>
+        <li><a href="index.html">概要</a></li>
+        <li><a href="setup.html">インストール・初期設定</a></li>
+        <li><a href="shortcodes.html">ショートコード</a></li>
+        <li><a href="customization.html">カスタマイズ</a></li>
+        <li><a href="detail-page.html">詳細ページ機能</a></li>
+        <li class="active"><a href="troubleshooting.html">トラブルシューティング</a></li>
+    </ul>
+</nav>
+
+<main class="content">
+    <h1>トラブルシューティング</h1>
+    <p class="lead">よくある問題とその解決方法、動作要件、技術仕様をまとめています。</p>
+
+    <h2>よくある問題と解決策</h2>
+
+    <h3>「Shortcode Error: ユーザーはHTTP経由のリクエストをブロックしました」と表示される</h3>
+    <p><strong>原因:</strong> サイトのwp-config.phpに <code>WP_HTTP_BLOCK_EXTERNAL</code> が true で設定されており、<code>WP_ACCESSIBLE_HOSTS</code> に <code>api.github.com</code> が含まれていません。</p>
+
+    <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-body">
+            <p>wp-config.phpを開き、<code>WP_ACCESSIBLE_HOSTS</code> の定義に <code>api.github.com,raw.githubusercontent.com</code> を追加します。</p>
+        </div>
+    </div>
+    <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-body">
+            <p><code>define('WP_ACCESSIBLE_HOSTS', 'localhost,api.github.com,raw.githubusercontent.com');</code> のように保存します。</p>
+        </div>
+    </div>
+
+    <div class="callout callout-note">
+        <p>本番サイトでは通常 <code>WP_HTTP_BLOCK_EXTERNAL</code> は設定されていないため、このエラーはローカル開発環境でのみ発生します。</p>
+    </div>
+
+    <h3>GitHub API rate limit exceeded エラーが出る</h3>
+    <p><strong>原因:</strong> GitHub APIは未認証だと 60req/h、認証時は 5000req/h の制限があります。</p>
+
+    <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-body">
+            <p>GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens でトークンを発行します（<code>public_repo</code> readスコープのみで十分）。</p>
+        </div>
+    </div>
+    <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-body">
+            <p>管理画面「基本設定」タブの「GitHub Personal Access Token」にペーストして保存します。</p>
+        </div>
+    </div>
+    <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-body">
+            <p>「キャッシュ管理」タブから手動でキャッシュをクリアし、再アクセスします。</p>
+        </div>
+    </div>
+
+    <div class="callout callout-tip">
+        <p>キャッシュ有効期限を長めに設定（例: 12時間）することでAPIコール数を削減できます。</p>
+    </div>
+
+    <h3>詳細ページが 404 エラーになる</h3>
+    <p><strong>原因:</strong> WordPress のリライトルールが古い、または詳細ページのベースパスが変更されたまま再フラッシュされていません。</p>
+
+    <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-body">
+            <p>WordPress 管理画面「設定 → パーマリンク」を開きます。</p>
+        </div>
+    </div>
+    <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-body">
+            <p>特に何も変更せずに「変更を保存」をクリックします。</p>
+        </div>
+    </div>
+    <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-body">
+            <p>該当の詳細ページにアクセスして表示を確認します。</p>
+        </div>
+    </div>
+
+    <div class="callout callout-warning">
+        <p>ベースパスを変更した直後は必ずパーマリンクの再保存が必要です。</p>
+    </div>
+
+    <h3>Cron 自動更新が実行されない</h3>
+    <p><strong>原因:</strong> WordPress の Cron は実際のサイトアクセスで実行されるため、アクセスがないと動作しません。また <code>DISABLE_WP_CRON</code> が true の場合は無効化されています。</p>
+
+    <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-body">
+            <p>「キャッシュ管理」タブで「自動更新を有効にする」にチェックが入っているか確認します。</p>
+        </div>
+    </div>
+    <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-body">
+            <p>wp-config.php で <code>DISABLE_WP_CRON</code> が true になっていないか確認します。</p>
+        </div>
+    </div>
+    <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-body">
+            <p>長時間アクセスがないサイトでは、OSのcrontabで <code>wp cron event run --due-now</code> を定期実行します。</p>
+        </div>
+    </div>
+
+    <div class="callout callout-note">
+        <p>WP-Cron は 6時間ごと（デフォルト）に追跡対象の全リポジトリの出力キャッシュを更新します。</p>
+    </div>
+
+    <h3>カードに Pages ボタンが出ない</h3>
+    <p><strong>原因:</strong> 対象リポジトリで GitHub Pages が有効化されていない（<code>has_pages=false</code>）か、キャッシュに古いデータが残っています。</p>
+
+    <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-body">
+            <p>GitHub でリポジトリの Settings → Pages から Pages が有効か確認します。</p>
+        </div>
+    </div>
+    <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-body">
+            <p>「キャッシュ管理」タブで「すべてのキャッシュをクリア」を実行します。</p>
+        </div>
+    </div>
+    <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-body">
+            <p>該当ページを再読み込みします。</p>
+        </div>
+    </div>
+
+    <h2>動作要件</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>項目</th>
+                <th>要件</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>WordPress</td>
+                <td>5.0 以上</td>
+            </tr>
+            <tr>
+                <td>PHP</td>
+                <td>7.2 以上</td>
+            </tr>
+            <tr>
+                <td>外部通信</td>
+                <td><code>https://api.github.com</code> および <code>https://raw.githubusercontent.com</code> へのHTTPS通信</td>
+            </tr>
+            <tr>
+                <td>推奨: Parsedown</td>
+                <td><code>erusev/parsedown</code> がインストールされていればローカルでMarkdownをパース</td>
+            </tr>
+            <tr>
+                <td>推奨: GitHub PAT</td>
+                <td>API レート制限緩和（60→5000req/h）</td>
+            </tr>
+            <tr>
+                <td>対応ブラウザ</td>
+                <td>Chrome / Firefox / Safari / Edge の最新版</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>技術仕様</h2>
+
+    <ul>
+        <li><strong>GitHub API バージョン:</strong> REST API v3（Accept: application/vnd.github.v3+json）</li>
+        <li><strong>認証方式:</strong> Bearer（<code>github_pat_*</code>, <code>ghp_*</code>）/ token（Classic）の自動判別</li>
+        <li><strong>キャッシュ方式:</strong> WordPress Transient API（wp_options テーブル）</li>
+        <li><strong>キャッシュキー:</strong> <code>kgrd_output_</code> + MD5ハッシュ（ショートコード属性単位）</li>
+        <li><strong>キャッシュ期間:</strong> 1〜24時間（既定6時間）+ 10〜30%のランダムジッタ</li>
+        <li><strong>Cron フック名:</strong> <code>kgrd_cache_refresh_event</code></li>
+        <li><strong>Cron カスタムスケジュール:</strong> <code>kgrd_custom_interval</code></li>
+        <li><strong>リライトルール登録:</strong> 追跡対象の各リポジトリごとに <code>/{base}/{slug}/?$</code></li>
+        <li><strong>データ保存先:</strong> wp_options テーブル（<code>kgrd_*</code> プレフィックス）</li>
+        <li><strong>言語ドメイン:</strong> <code>kashiwazaki-github-repo-display</code></li>
+    </ul>
+
+    <h2>キャッシュ管理</h2>
+    <div class="screenshot"><img src="images/screenshots/04-cache-management.png" alt="キャッシュ管理タブ" class="lightbox-trigger"></div>
+    <p>管理画面「キャッシュ管理」タブからは、追跡中リポジトリ数・最終自動更新時刻・次回更新予定時刻・手動クリアボタンが利用できます。</p>
+
+    <h2>アーキテクチャ</h2>
+    <figure class="infographic">
+        <img src="images/infographics/architecture.png" alt="プラグインのアーキテクチャ">
+        <figcaption>図: プラグインの内部アーキテクチャとデータフロー</figcaption>
+    </figure>
+
+    <nav class="page-nav">
+        <a href="detail-page.html" class="prev">&laquo; 詳細ページ機能</a>
+        <span></span>
+    </nav>
+
+    <footer class="manual-footer">
+        <p>作者: <a href="https://www.tsuyoshikashiwazaki.jp/" target="_blank" rel="noopener">柏崎剛（Tsuyoshi Kashiwazaki）</a></p>
+        <p>プラグイン: Kashiwazaki GitHub Repository Display v1.0.1</p>
+    </footer>
+</main>
+
+<div class="lightbox"></div>
+<script src="js/manual.js"></script>
+</body>
+</html>

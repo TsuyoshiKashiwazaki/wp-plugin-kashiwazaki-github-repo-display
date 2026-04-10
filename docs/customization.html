@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カスタマイズ - Kashiwazaki GitHub Repository Display マニュアル</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<button class="hamburger-btn" aria-label="メニューを開く">&#9776;</button>
+
+<nav class="sidebar">
+    <div class="sidebar-header">
+        <h2 style="color:#fff;">GitHub Repo Display</h2>
+        <span class="version">v1.0.1</span>
+        <img src="images/main-visual.png" alt="" style="width:100%;border-radius:4px;margin-top:8px;">
+    </div>
+    <ul>
+        <li><a href="index.html">概要</a></li>
+        <li><a href="setup.html">インストール・初期設定</a></li>
+        <li><a href="shortcodes.html">ショートコード</a></li>
+        <li><a href="customization.html">カスタマイズ</a></li>
+        <li><a href="detail-page.html">詳細ページ機能</a></li>
+        <li><a href="troubleshooting.html">トラブルシューティング</a></li>
+    </ul>
+</nav>
+
+<main class="content">
+    <h1>カスタマイズ</h1>
+    <p class="lead">バッジの種類、カードのカラー、角丸、余白、ボタンラベルなどを管理画面から自由にカスタマイズできます。</p>
+
+    <h2>ボタンラベル</h2>
+    <p>カード表示と詳細ページに並ぶ4つのアクションボタンのラベルは、管理画面「基本設定」タブから自由に変更できます。デフォルトラベルは以下のとおりです。</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>設定項目</th>
+                <th>オプションキー</th>
+                <th>デフォルト</th>
+                <th>説明</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Details</td>
+                <td><code>kgrd_label_details</code></td>
+                <td>Details</td>
+                <td>リポジトリ詳細ページへのリンクボタン</td>
+            </tr>
+            <tr>
+                <td>Source</td>
+                <td><code>kgrd_label_source</code></td>
+                <td>Source</td>
+                <td>GitHubリポジトリへのリンクボタン</td>
+            </tr>
+            <tr>
+                <td>ZIP Download</td>
+                <td><code>kgrd_label_download</code></td>
+                <td>ZIP Download</td>
+                <td>最新リリースまたはデフォルトブランチのZIPダウンロード</td>
+            </tr>
+            <tr>
+                <td>Docs</td>
+                <td><code>kgrd_label_pages</code></td>
+                <td>Docs</td>
+                <td>GitHub Pages サイトへのリンク（<code>has_pages=true</code> のリポジトリのみ表示）</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">ヒント</div>
+        <p>空欄で保存するとデフォルトラベルに自動的に戻ります。多言語サイトでは例えば <code>詳細 / ソース / ダウンロード / ドキュメント</code> のように日本語化することも可能です。</p>
+    </div>
+
+    <h2>バッジ設定</h2>
+    <p>管理画面「バッジ設定」タブでは、リポジトリカードに表示する shields.io バッジを16種類から選択できます。</p>
+
+    <div class="screenshot"><img src="images/screenshots/02-badges-settings.png" alt="バッジ設定タブ" class="lightbox-trigger"></div>
+
+    <h3>主要バッジ（既定ON）</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>バッジ</th>
+                <th>内容</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>Version</td><td>最新リリースバージョン</td></tr>
+            <tr><td>Last Commit</td><td>最終コミットからの経過時間</td></tr>
+            <tr><td>License</td><td>リポジトリのライセンス</td></tr>
+            <tr><td>Stars</td><td>スター数</td></tr>
+            <tr><td>Forks</td><td>フォーク数</td></tr>
+            <tr><td>Issues</td><td>オープンなイシュー数</td></tr>
+            <tr><td>Language</td><td>主要プログラミング言語</td></tr>
+            <tr><td>Contributors</td><td>コントリビューター数</td></tr>
+        </tbody>
+    </table>
+
+    <h3>追加バッジ（既定OFF）</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>バッジ</th>
+                <th>内容</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>Watchers</td><td>ウォッチャー数</td></tr>
+            <tr><td>Open PRs</td><td>オープンなプルリクエスト数</td></tr>
+            <tr><td>Closed Issues</td><td>クローズ済みイシュー数</td></tr>
+            <tr><td>Downloads</td><td>リリースのダウンロード総数</td></tr>
+            <tr><td>Code Size</td><td>コードベースのサイズ</td></tr>
+            <tr><td>Repo Size</td><td>リポジトリ総サイズ</td></tr>
+            <tr><td>Commit Activity</td><td>直近のコミット頻度</td></tr>
+            <tr><td>Release Date</td><td>最新リリース日</td></tr>
+        </tbody>
+    </table>
+
+    <h2>デザイン設定</h2>
+    <p>「デザイン設定」タブからカードの見た目を変更できます。</p>
+
+    <div class="screenshot"><img src="images/screenshots/03-design-settings.png" alt="デザイン設定タブ" class="lightbox-trigger"></div>
+
+    <h3>カラー</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>項目</th>
+                <th>オプションキー</th>
+                <th>デフォルト</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>ボタン文字色</td><td><code>kgrd_button_text</code></td><td>#ffffff</td></tr>
+            <tr><td>ボタン背景色</td><td><code>kgrd_button_bg</code></td><td>#333333</td></tr>
+            <tr><td>ボタン枠線</td><td><code>kgrd_button_border</code></td><td>#333333</td></tr>
+            <tr><td>カード枠線</td><td><code>kgrd_card_border</code></td><td>#dddddd</td></tr>
+            <tr><td>カード背景</td><td><code>kgrd_card_background</code></td><td>#ffffff</td></tr>
+            <tr><td>本文テキスト</td><td><code>kgrd_text_color</code></td><td>#333333</td></tr>
+        </tbody>
+    </table>
+
+    <h3>レイアウト・装飾</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>項目</th>
+                <th>オプションキー</th>
+                <th>デフォルト</th>
+                <th>説明</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>角丸</td><td><code>kgrd_border_radius</code></td><td>0</td><td>px単位</td></tr>
+            <tr><td>余白</td><td><code>kgrd_spacing</code></td><td>16</td><td>px単位</td></tr>
+            <tr><td>シャドウ</td><td><code>kgrd_enable_shadow</code></td><td>オフ</td><td>カードにドロップシャドウ</td></tr>
+            <tr><td>アニメーション</td><td><code>kgrd_enable_animation</code></td><td>オフ</td><td>カードに軽いアニメーション</td></tr>
+            <tr><td>ホバー浮き上がり</td><td><code>kgrd_enable_hover_lift</code></td><td>オフ</td><td>ホバー時にカードを浮かせる</td></tr>
+        </tbody>
+    </table>
+
+    <nav class="page-nav">
+        <a href="shortcodes.html" class="prev">&laquo; ショートコード</a>
+        <a href="detail-page.html" class="next">詳細ページ機能 &raquo;</a>
+    </nav>
+
+    <footer class="manual-footer">
+        <p>作者: <a href="https://www.tsuyoshikashiwazaki.jp/" target="_blank" rel="noopener">柏崎剛（Tsuyoshi Kashiwazaki）</a></p>
+        <p>プラグイン: Kashiwazaki GitHub Repository Display v1.0.1</p>
+    </footer>
+</main>
+
+<div class="lightbox"></div>
+<script src="js/manual.js"></script>
+</body>
+</html>

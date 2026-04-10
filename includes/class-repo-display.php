@@ -268,6 +268,27 @@ class KGRD_Repo_Display {
 		// Generate badges.
 		$badges = $this->get_shields_badges( $data );
 
+		// Button labels (customizable via settings).
+		$label_details  = get_option( 'kgrd_label_details', 'Details' );
+		$label_source   = get_option( 'kgrd_label_source', 'Source' );
+		$label_download = get_option( 'kgrd_label_download', 'ZIP Download' );
+		$label_pages    = get_option( 'kgrd_label_pages', 'Docs' );
+		if ( '' === trim( (string) $label_details ) )  { $label_details  = 'Details'; }
+		if ( '' === trim( (string) $label_source ) )   { $label_source   = 'Source'; }
+		if ( '' === trim( (string) $label_download ) ) { $label_download = 'ZIP Download'; }
+		if ( '' === trim( (string) $label_pages ) )    { $label_pages    = 'Docs'; }
+
+		// Build GitHub Pages button if Pages is enabled for this repo.
+		$pages_button_html = '';
+		$pages_url         = KGRD_GitHub_API::get_pages_url( $data );
+		if ( ! empty( $pages_url ) ) {
+			$pages_button_html = sprintf(
+				'<a href="%s" class="kgrd-card__button kgrd-card__button--pages" target="_blank" rel="noopener noreferrer">%s</a>',
+				esc_url( $pages_url ),
+				esc_html( $label_pages )
+			);
+		}
+
 		// Build descriptions HTML.
 		$descriptions_html = '';
 		if ( ! empty( $github_description ) ) {
@@ -358,6 +379,7 @@ class KGRD_Repo_Display {
 						<a href="%s" class="kgrd-card__button kgrd-card__button--download" target="_blank" rel="noopener noreferrer">
 							%s
 						</a>
+						%s
 					</div>
 				</div>',
 				esc_attr( $data['full_name'] ),
@@ -373,11 +395,12 @@ class KGRD_Repo_Display {
 				esc_html( $language ),
 				$badges,
 				esc_url( KGRD_Repo_Detail_Page::get_detail_url( $data['owner']['login'], $data['name'] ) ),
-				esc_html__( 'Details', 'kashiwazaki-github-repo-display' ),
+				esc_html( $label_details ),
 				$html_url,
-				esc_html__( 'View on GitHub', 'kashiwazaki-github-repo-display' ),
+				esc_html( $label_source ),
 				$download_url,
-				esc_html__( 'Download', 'kashiwazaki-github-repo-display' )
+				esc_html( $label_download ),
+				$pages_button_html
 			),
 			$data
 		);

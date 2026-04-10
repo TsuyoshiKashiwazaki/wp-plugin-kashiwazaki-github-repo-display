@@ -204,6 +204,19 @@
 	color: #ffffff !important;
 }
 
+/* Pages Button - Purple style (shown only if repo has GitHub Pages) */
+.kgrd-card__button--pages {
+	background-color: #8250df !important;
+	color: #ffffff !important;
+	border: 1px solid #8250df !important;
+}
+
+.kgrd-card__button--pages:hover {
+	background-color: #6639ba !important;
+	border-color: #6639ba !important;
+	color: #ffffff !important;
+}
+
 /* Legacy button styles for backwards compatibility */
 .kgrd-card__button--primary {
 	background-color: var(--kgrd-button-bg);

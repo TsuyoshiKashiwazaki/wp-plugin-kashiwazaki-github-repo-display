@@ -3,7 +3,7 @@
  * Plugin Name: Kashiwazaki GitHub Repository Display
  * Plugin URI: https://www.tsuyoshikashiwazaki.jp/
  * Description: Display GitHub repository information dynamically on your WordPress site. Simply specify a repository name to fetch and display the latest information from the GitHub API.
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Tsuyoshi Kashiwazaki
  * Author URI: https://www.tsuyoshikashiwazaki.jp/
  * License: GPL v2 or later
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'KGRD_VERSION', '1.0.1' );
+define( 'KGRD_VERSION', '1.0.2' );
 define( 'KGRD_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KGRD_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'KGRD_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );

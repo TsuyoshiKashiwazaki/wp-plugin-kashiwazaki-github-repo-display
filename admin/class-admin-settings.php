@@ -176,6 +176,25 @@ class KGRD_Admin_Settings {
 			)
 		);
 
+		// ボタンラベル
+		$button_labels = array(
+			'label_details'  => 'Details',
+			'label_source'   => 'Source',
+			'label_download' => 'ZIP Download',
+			'label_pages'    => 'Docs',
+		);
+		foreach ( $button_labels as $opt => $default ) {
+			register_setting(
+				'kgrd_general_group',
+				'kgrd_' . $opt,
+				array(
+					'type'              => 'string',
+					'sanitize_callback' => 'sanitize_text_field',
+					'default'           => $default,
+				)
+			);
+		}
+
 		// バッジ設定
 		$badge_types = array(
 			// メジャー（デフォルトON）
@@ -308,6 +327,14 @@ class KGRD_Admin_Settings {
 			'kgrd_detail_base_path',
 			'詳細ページのベースパス',
 			array( $this, 'render_base_path_field' ),
+			'kgrd-general',
+			'kgrd_general_section'
+		);
+
+		add_settings_field(
+			'kgrd_button_labels',
+			'ボタンラベル',
+			array( $this, 'render_button_labels_field' ),
 			'kgrd-general',
 			'kgrd_general_section'
 		);
@@ -631,6 +658,31 @@ class KGRD_Admin_Settings {
 			変更後はパーマリンク設定を更新してください（設定 → パーマリンク → 変更を保存）。
 		</p>
 		<?php
+	}
+
+	/**
+	 * Render button labels fields.
+	 */
+	public function render_button_labels_field() {
+		$labels = array(
+			'label_details'  => array( 'Details', '詳細ページへのリンク' ),
+			'label_source'   => array( 'Source', 'GitHubリポジトリへのリンク' ),
+			'label_download' => array( 'ZIP Download', 'ZIPダウンロードリンク' ),
+			'label_pages'    => array( 'Docs', 'GitHub Pagesへのリンク（Pages有効時のみ表示）' ),
+		);
+		foreach ( $labels as $key => $meta ) {
+			list( $default, $desc ) = $meta;
+			$value = get_option( 'kgrd_' . $key, $default );
+			printf(
+				'<p style="margin:6px 0;"><label style="display:inline-block;min-width:160px;"><strong>%s</strong></label> <input type="text" name="kgrd_%s" value="%s" class="regular-text" placeholder="%s" /> <span class="description">%s</span></p>',
+				esc_html( $desc ),
+				esc_attr( $key ),
+				esc_attr( $value ),
+				esc_attr( $default ),
+				''
+			);
+		}
+		echo '<p class="description">各ボタンのラベルをカスタマイズできます。空欄でデフォルト値が使用されます。</p>';
 	}
 
 	/**

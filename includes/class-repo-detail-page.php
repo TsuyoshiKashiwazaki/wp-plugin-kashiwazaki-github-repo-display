@@ -394,13 +394,29 @@ class KGRD_Repo_Detail_Page {
 					<?php endif; ?>
 				</div>
 
+				<?php
+				$kgrd_label_source   = get_option( 'kgrd_label_source', 'Source' );
+				$kgrd_label_download = get_option( 'kgrd_label_download', 'ZIP Download' );
+				$kgrd_label_pages    = get_option( 'kgrd_label_pages', 'Docs' );
+				if ( '' === trim( (string) $kgrd_label_source ) )   { $kgrd_label_source   = 'Source'; }
+				if ( '' === trim( (string) $kgrd_label_download ) ) { $kgrd_label_download = 'ZIP Download'; }
+				if ( '' === trim( (string) $kgrd_label_pages ) )    { $kgrd_label_pages    = 'Docs'; }
+				?>
 				<div class="kgrd-detail-buttons">
 					<a href="<?php echo esc_url( $data['html_url'] ); ?>" target="_blank" rel="noopener" class="kgrd-detail-button">
-						<?php esc_html_e( 'View on GitHub', 'kashiwazaki-github-repo-display' ); ?>
+						<?php echo esc_html( $kgrd_label_source ); ?>
 					</a>
 					<?php if ( ! empty( $data['download_url'] ) ) : ?>
 						<a href="<?php echo esc_url( $data['download_url'] ); ?>" class="kgrd-detail-button kgrd-detail-button--secondary">
-							<?php esc_html_e( 'Download', 'kashiwazaki-github-repo-display' ); ?>
+							<?php echo esc_html( $kgrd_label_download ); ?>
+						</a>
+					<?php endif; ?>
+					<?php
+					$kgrd_pages_url = KGRD_GitHub_API::get_pages_url( $data );
+					if ( ! empty( $kgrd_pages_url ) ) :
+						?>
+						<a href="<?php echo esc_url( $kgrd_pages_url ); ?>" target="_blank" rel="noopener" class="kgrd-detail-button kgrd-detail-button--pages">
+							<?php echo esc_html( $kgrd_label_pages ); ?>
 						</a>
 					<?php endif; ?>
 				</div>

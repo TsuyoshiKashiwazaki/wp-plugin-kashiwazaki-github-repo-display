@@ -5,6 +5,32 @@ All notable changes to the Kashiwazaki GitHub Repository Display plugin will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2026-04-10
+
+### Added
+
+#### GitHub Pages Button
+- Automatic detection of GitHub Pages (`has_pages` flag) on each repository
+- Conditional "Docs" button rendered on card display and detail page when Pages is enabled
+- Correct URL generation for project sites (`https://{owner}.github.io/{repo}/`) and user/organization sites (`https://{owner}.github.io/` for `{owner}.github.io` repositories)
+
+#### Customizable Button Labels
+- Four new settings under "General" tab to customize the action button labels:
+  - `kgrd_label_details` (default: "Details")
+  - `kgrd_label_source` (default: "Source")
+  - `kgrd_label_download` (default: "ZIP Download")
+  - `kgrd_label_pages` (default: "Docs")
+- Empty values automatically fall back to the default labels
+- Labels apply to both card display and detail page buttons
+
+#### Documentation
+- Full HTML manual added under `docs/` for GitHub Pages (index, setup, shortcodes, customization, detail-page, troubleshooting)
+- Screenshots, infographics, and main visual banner included
+
+### Changed
+- "View on GitHub" button renamed to "Source" by default
+- "Download" button renamed to "ZIP Download" by default
+
 ## [1.0.1] - 2026-01-05
 
 ### Added
@@ -206,6 +232,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History
 
+- **1.0.2** - 2026-04-10 - GitHub Pages button, customizable button labels, full HTML manual
 - **1.0.1** - 2026-01-05 - Repository detail page, cache jitter, WP-Cron support, button redesign
 - **1.0.0** - 2025-10-15 - Initial release
 
@@ -222,6 +249,7 @@ Developed by [Tsuyoshi Kashiwazaki](https://www.tsuyoshikashiwazaki.jp/)
 
 ---
 
+[1.0.2]: https://github.com/TsuyoshiKashiwazaki/kashiwazaki-github-repo-display/releases/tag/1.0.2
 [1.0.1]: https://github.com/TsuyoshiKashiwazaki/kashiwazaki-github-repo-display/releases/tag/1.0.1
 [1.0.0]: https://github.com/TsuyoshiKashiwazaki/kashiwazaki-github-repo-display/releases/tag/1.0.0
-[Unreleased]: https://github.com/TsuyoshiKashiwazaki/kashiwazaki-github-repo-display/compare/1.0.1...HEAD
+[Unreleased]: https://github.com/TsuyoshiKashiwazaki/kashiwazaki-github-repo-display/compare/1.0.2...HEAD

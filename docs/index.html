@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>概要 - Kashiwazaki GitHub Repository Display マニュアル</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<button class="hamburger-btn" aria-label="メニューを開く">&#9776;</button>
+
+<nav class="sidebar">
+    <div class="sidebar-header">
+        <h2 style="color:#fff;">GitHub Repo Display</h2>
+        <span class="version">v1.0.1</span>
+        <img src="images/main-visual.png" alt="" style="width:100%;border-radius:4px;margin-top:8px;">
+    </div>
+    <ul>
+        <li><a href="index.html">概要</a></li>
+        <li><a href="setup.html">インストール・初期設定</a></li>
+        <li><a href="shortcodes.html">ショートコード</a></li>
+        <li><a href="customization.html">カスタマイズ</a></li>
+        <li><a href="detail-page.html">詳細ページ機能</a></li>
+        <li><a href="troubleshooting.html">トラブルシューティング</a></li>
+    </ul>
+</nav>
+
+<main class="content">
+    <h1>Kashiwazaki GitHub Repository Display マニュアル</h1>
+    <img src="images/main-visual.png" alt="GitHub Repo Display メインビジュアル" style="width:100%; border-radius:8px; margin-bottom:24px;">
+
+    <p class="lead">Kashiwazaki GitHub Repository Display は、GitHubリポジトリの情報をWordPressサイト上にショートコードで動的に表示するプラグインです。開発者・技術ブロガー・WordPressプラグイン作者が、自分の公開リポジトリを最新の状態で魅力的に紹介するために設計されています。</p>
+
+    <p>GitHubリポジトリを記事内で紹介する際、READMEや説明文を手動でコピー&amp;ペーストすると、スターの数・最終更新日・バージョンなどの情報が次第に現実と乖離し、読者に古い情報を伝えてしまう問題があります。本プラグインは GitHub API から最新情報を自動取得し、キャッシュ付きで表示することでこの課題を解決します。ショートコードを貼るだけで、リポジトリの鮮度を常に保った紹介ブロックを記事中に配置できます。</p>
+
+    <h2>主要機能</h2>
+
+    <div class="feature-cards">
+        <div class="feature-card">
+            <span class="icon">&#128230;</span>
+            <h3>動的リポジトリ表示</h3>
+            <p>GitHubリポジトリ情報を3種類のショートコードで表示。単一リポジトリ・複数指定・ユーザー全リポジトリの3パターンに対応し、Card / Minimal / Badges-only の3スタイルを選択可能です。</p>
+        </div>
+        <div class="feature-card">
+            <span class="icon">&#128196;</span>
+            <h3>リポジトリ詳細ページ</h3>
+            <p>リポジトリごとに固有のURLを持つ詳細ページを自動生成します。README.md をMarkdownパースしてHTMLレンダリングし、GitHub Pages ボタンも自動で追加されます。</p>
+        </div>
+        <div class="feature-card">
+            <span class="icon">&#9889;</span>
+            <h3>スマートキャッシュ</h3>
+            <p>GitHub APIのレート制限を回避するためのトランジェントキャッシュ（ジッタ付き）、WP-Cronによる定期バックグラウンド更新、shields.io バッジ表示を内蔵しています。</p>
+        </div>
+    </div>
+
+    <h2>全体ワークフロー</h2>
+
+    <figure class="infographic">
+        <img src="images/infographics/overview-flow.png" alt="プラグイン全体のワークフロー">
+        <figcaption>図: ショートコード → GitHub API → キャッシュ → HTML出力の全体フロー</figcaption>
+    </figure>
+
+    <h2>SEO / GEO における強み</h2>
+
+    <h3>SEO観点</h3>
+    <p>本プラグインのフロントエンドCSS/JSは約18KB程度と軽量で、ページ読み込み速度への悪影響を抑えることができます。また、README.md や readme.txt の内容は Markdown パース済みの HTML として出力されるため、検索エンジンのクローラーがリポジトリの内容を構造化されたテキストとして読み取ることができます。リポジトリごとに固有のパーマリンクを持つ詳細ページが生成されるため、個別URL単位でインデックスされやすくなり、リポジトリ単位の流入経路を獲得できる可能性が高まります。</p>
+
+    <h3>GEO観点（生成AI検索最適化）</h3>
+    <p>リポジトリの説明や README の内容は、見出し階層・リスト・コードブロックなどの構造を保った HTML として出力されます。そのため、AI検索エンジンやLLMベースのシステムがリポジトリの機能・技術スタック・ライセンス情報などを正確に取得しやすくなります。さらに、表示される情報は GitHub API と定期的に同期されたキャッシュから配信されるため、古い情報を返してしまうリスクを低下させる設計になっています。</p>
+
+    <div class="callout callout-note">
+        <p>本プラグインは検索順位の上昇を保証するものではありません。軽量な出力と構造化されたHTMLにより、ページ表示パフォーマンスやクローラビリティを「低下させない」ことを主眼に設計しています。</p>
+    </div>
+
+    <h2>目次</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width:32%;">ページ</th>
+                <th>内容</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><a href="index.html">概要</a></td>
+                <td>プラグインの概要・主要機能・SEO/GEO観点での強みを解説</td>
+            </tr>
+            <tr>
+                <td><a href="setup.html">インストール・初期設定</a></td>
+                <td>インストール手順と初期設定、GitHub PAT登録方法</td>
+            </tr>
+            <tr>
+                <td><a href="shortcodes.html">ショートコード</a></td>
+                <td>3種類のショートコードと全属性のリファレンス</td>
+            </tr>
+            <tr>
+                <td><a href="customization.html">カスタマイズ</a></td>
+                <td>カード表示スタイル・バッジ・ボタンラベルの変更方法</td>
+            </tr>
+            <tr>
+                <td><a href="detail-page.html">詳細ページ機能</a></td>
+                <td>リポジトリ詳細ページとGitHub Pagesボタン</td>
+            </tr>
+            <tr>
+                <td><a href="troubleshooting.html">トラブルシューティング</a></td>
+                <td>よくある問題と解決策、技術仕様</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>動作要件</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width:32%;">項目</th>
+                <th>要件</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>WordPress</td>
+                <td>5.0 以上</td>
+            </tr>
+            <tr>
+                <td>PHP</td>
+                <td>7.2 以上</td>
+            </tr>
+            <tr>
+                <td>外部通信</td>
+                <td>サーバーから <code>https://api.github.com</code> および <code>https://raw.githubusercontent.com</code> への外部HTTPS通信が可能であること</td>
+            </tr>
+            <tr>
+                <td>GitHub Personal Access Token</td>
+                <td>推奨（未使用の場合、GitHub APIのレート制限が 60 req/h に低下します）</td>
+            </tr>
+            <tr>
+                <td>ライセンス</td>
+                <td>GPL v2 or later</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="callout callout-tip">
+        <p>インストールと初期設定の手順は <a href="setup.html">インストール・初期設定</a> ページで説明しています。まずはこちらから読み進めてください。</p>
+    </div>
+
+    <nav class="page-nav">
+        <span></span>
+        <a href="setup.html" class="next">インストール・初期設定 &raquo;</a>
+    </nav>
+
+    <footer class="manual-footer">
+        <p>作者: <a href="https://www.tsuyoshikashiwazaki.jp/" target="_blank" rel="noopener">柏崎剛（Tsuyoshi Kashiwazaki）</a></p>
+        <p>プラグイン: Kashiwazaki GitHub Repository Display v1.0.1</p>
+    </footer>
+</main>
+
+<div class="lightbox"></div>
+<script src="js/manual.js"></script>
+</body>
+</html>

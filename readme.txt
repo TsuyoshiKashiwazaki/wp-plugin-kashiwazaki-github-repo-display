@@ -4,7 +4,7 @@ Tags: github, repository, api, shortcode, developer
 Requires at least: 5.0
 Tested up to: 6.4
 Requires PHP: 7.2
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -163,6 +163,13 @@ Yes, you can add the shortcodes in a Shortcode block or Classic block in the Gut
 
 == Changelog ==
 
+= 1.0.2 - 2026-04-10 =
+* Added: Automatic "Docs" button linking to GitHub Pages when `has_pages=true`
+* Added: Customizable button labels (Details / Source / ZIP Download / Docs) via General settings
+* Added: Full HTML manual under docs/ directory for GitHub Pages publication
+* Changed: Default "View on GitHub" button label renamed to "Source"
+* Changed: Default "Download" button label renamed to "ZIP Download"
+
 = 1.0.1 - 2026-01-05 =
 * Added: Repository detail page with full README content display
 * Added: GitHub Flavored Markdown rendering on detail pages
@@ -191,6 +198,9 @@ Yes, you can add the shortcodes in a Shortcode block or Classic block in the Gut
 * Shields.io badges integration
 
 == Upgrade Notice ==
+
+= 1.0.2 =
+New: GitHub Pages auto-detection with "Docs" button, customizable button labels, full HTML manual.
 
 = 1.0.1 =
 New: Repository detail page, cache jitter, WP-Cron support, improved button design.

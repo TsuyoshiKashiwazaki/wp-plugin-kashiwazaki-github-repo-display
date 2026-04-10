@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>インストール・初期設定 - Kashiwazaki GitHub Repository Display マニュアル</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<button class="hamburger-btn" aria-label="メニューを開く">&#9776;</button>
+
+<nav class="sidebar">
+    <div class="sidebar-header">
+        <h2 style="color:#fff;">GitHub Repo Display</h2>
+        <span class="version">v1.0.1</span>
+        <img src="images/main-visual.png" alt="" style="width:100%;border-radius:4px;margin-top:8px;">
+    </div>
+    <ul>
+        <li><a href="index.html">概要</a></li>
+        <li><a href="setup.html">インストール・初期設定</a></li>
+        <li><a href="shortcodes.html">ショートコード</a></li>
+        <li><a href="customization.html">カスタマイズ</a></li>
+        <li><a href="detail-page.html">詳細ページ機能</a></li>
+        <li><a href="troubleshooting.html">トラブルシューティング</a></li>
+    </ul>
+</nav>
+
+<main class="content">
+    <h1>インストール・初期設定</h1>
+    <p class="lead">プラグインのインストールから初期設定、GitHub Personal Access Tokenの登録まで、ステップバイステップで解説します。</p>
+
+    <h2>インストール方法</h2>
+
+    <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-body">
+            <h3>プラグインファイルのアップロード</h3>
+            <p>プラグインファイルを <code>/wp-content/plugins/</code> ディレクトリにアップロードします。zipファイルを WordPress 管理画面の「プラグイン &gt; 新規追加 &gt; プラグインのアップロード」から取り込むか、FTP/SSH 経由でディレクトリを直接配置してください。</p>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-body">
+            <h3>プラグインの有効化</h3>
+            <p>WordPress 管理画面の「プラグイン」一覧から「Kashiwazaki GitHub Repository Display」を探し、「有効化」をクリックします。</p>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-body">
+            <h3>管理メニューの確認</h3>
+            <p>有効化に成功すると、WordPress 管理画面の左メニューに「Kashiwazaki GitHub Repository Display」項目が追加されます。ここから設定画面にアクセスできます。</p>
+            <div class="screenshot"><img src="images/screenshots/00-menu-location.png" alt="メニュー位置" class="lightbox-trigger"></div>
+        </div>
+    </div>
+
+    <div class="callout callout-tip">
+        <p><code>dashicons-github</code> アイコンが目印です。WordPress 管理画面サイドバーの「ツール」より下に追加されます。</p>
+    </div>
+
+    <h2>管理画面の構成</h2>
+
+    <p>設定ページは4つのタブに分かれています: 基本設定 / バッジ設定 / デザイン設定 / キャッシュ管理。各タブで設定できる項目の概要は以下のとおりです。</p>
+
+    <div class="feature-cards">
+        <div class="feature-card">
+            <span class="icon">&#9881;</span>
+            <h3>基本設定</h3>
+            <p>GitHub トークン・デフォルトユーザー名・キャッシュ時間・詳細ページベースパス・ボタンラベルを設定します。</p>
+        </div>
+        <div class="feature-card">
+            <span class="icon">&#127991;</span>
+            <h3>バッジ設定</h3>
+            <p>16種類の shields.io バッジの中から、カード表示で有効化するバッジを個別に選択できます。</p>
+        </div>
+        <div class="feature-card">
+            <span class="icon">&#127912;</span>
+            <h3>デザイン設定</h3>
+            <p>カード表示のカラー・角丸・余白・シャドウ・ホバー効果をカスタマイズします。</p>
+        </div>
+        <div class="feature-card">
+            <span class="icon">&#128260;</span>
+            <h3>キャッシュ管理</h3>
+            <p>追跡中のリポジトリ数・最終更新時刻の確認、およびキャッシュの手動クリアが可能です。</p>
+        </div>
+    </div>
+
+    <div class="callout callout-note">
+        <p>各タブのスクリーンショットは対応する機能ページ（<a href="customization.html">カスタマイズ</a> や <a href="detail-page.html">詳細ページ機能</a> など）で詳しく紹介しています。</p>
+    </div>
+
+    <h2>初期設定手順</h2>
+
+    <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-body">
+            <h3>デフォルトGitHubユーザー名の入力</h3>
+            <p>「基本設定」タブを開き、デフォルトGitHubユーザー名を入力します（例: <code>TsuyoshiKashiwazaki</code>）。ショートコードで <code>user</code> 属性を省略したときに、この値が自動的に使用されます。</p>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-body">
+            <h3>GitHub Personal Access Tokenの登録</h3>
+            <p>GitHub Personal Access Token を発行し、「基本設定」タブの入力欄にペーストします。トークンは暗号化せずオプションテーブルに保存されるため、共有環境では取り扱いに注意してください。</p>
+            <div class="callout callout-note">
+                <p>トークンなしでも動作しますが、GitHub API のレート制限が 60 req/h → 5000 req/h に緩和されます。<code>public_repo</code> の read スコープのみで十分です。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-body">
+            <h3>キャッシュ有効期限の設定</h3>
+            <p>キャッシュ有効期限を 1〜24 時間の範囲で設定します（既定値は 6 時間）。開発中やリポジトリの更新頻度が高い場合は短く、運用中の安定したリポジトリを紹介する場合は長めに設定すると効率的です。</p>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-number">4</div>
+        <div class="step-body">
+            <h3>設定の保存</h3>
+            <p>画面下部の「変更を保存」をクリックします。以降、ショートコードを記事中に貼り付けるだけでリポジトリ情報が表示されるようになります。</p>
+        </div>
+    </div>
+
+    <div class="callout callout-tip">
+        <p>Personal Access Token は GitHub &rarr; Settings &rarr; Developer settings &rarr; Personal access tokens &rarr; Fine-grained tokens から発行できます。<code>github_pat_*</code> / <code>ghp_*</code> どちらの形式にも対応しています。</p>
+    </div>
+
+    <div class="callout callout-warning">
+        <p>詳細ページ機能を使う場合、プラグイン有効化後に WordPress 管理画面の「設定 &rarr; パーマリンク」で「変更を保存」を1回クリックして、リライトルールをフラッシュしてください。これを行わないと詳細ページの URL が 404 になる場合があります。</p>
+    </div>
+
+    <nav class="page-nav">
+        <a href="index.html" class="prev">&laquo; 概要</a>
+        <a href="shortcodes.html" class="next">ショートコード &raquo;</a>
+    </nav>
+
+    <footer class="manual-footer">
+        <p>作者: <a href="https://www.tsuyoshikashiwazaki.jp/" target="_blank" rel="noopener">柏崎剛（Tsuyoshi Kashiwazaki）</a></p>
+        <p>プラグイン: Kashiwazaki GitHub Repository Display v1.0.1</p>
+    </footer>
+</main>
+
+<div class="lightbox"></div>
+<script src="js/manual.js"></script>
+</body>
+</html>
