@@ -4,7 +4,7 @@ Tags: github, repository, api, shortcode, developer
 Requires at least: 5.0
 Tested up to: 6.4
 Requires PHP: 7.2
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -112,7 +112,7 @@ The plugin provides several filter hooks for customization:
 
 = Do I need a GitHub API token? =
 
-No, the plugin uses the public GitHub API which doesn't require authentication for public repositories. However, unauthenticated requests are limited to 60 per hour per IP address.
+No, the plugin uses the public GitHub API which doesn't require authentication for public repositories. However, unauthenticated requests are limited to 60 per hour per IP address. Note that a token only raises the rate limit (60/hour to 5,000/hour) — it does not make pages load faster. Page speed depends on the cache settings.
 
 = How often is the repository data updated? =
 
@@ -163,6 +163,14 @@ Yes, you can add the shortcodes in a Shortcode block or Classic block in the Gut
 
 == Changelog ==
 
+= 1.0.3 - 2026-07-06 =
+* Fixed: Significantly improved page load speed by restoring API response caching. Repository data is now cached and reused instead of being re-fetched from the GitHub API on every page view.
+* Fixed: Background cache refresh (WP-Cron) now pre-warms caches in batches using a rebuild-then-replace strategy, so visitors no longer trigger a full cold rebuild.
+* Changed: Badge-related API requests are now made only when the corresponding badge is enabled, avoiding unnecessary requests.
+* Changed: Tag lookup now reuses the latest-release request to eliminate duplicate API calls.
+* Changed: Badge images now load lazily (`loading="lazy"`, `decoding="async"`).
+* Changed: Admin settings and readme clarify that a GitHub token only raises the API rate limit and does not affect page load speed.
+
 = 1.0.2 - 2026-04-10 =
 * Added: Automatic "Docs" button linking to GitHub Pages when `has_pages=true`
 * Added: Customizable button labels (Details / Source / ZIP Download / Docs) via General settings
@@ -198,6 +206,9 @@ Yes, you can add the shortcodes in a Shortcode block or Classic block in the Gut
 * Shields.io badges integration
 
 == Upgrade Notice ==
+
+= 1.0.3 =
+Performance: pages load dramatically faster thanks to restored API caching and fixed background pre-warming.
 
 = 1.0.2 =
 New: GitHub Pages auto-detection with "Docs" button, customizable button labels, full HTML manual.

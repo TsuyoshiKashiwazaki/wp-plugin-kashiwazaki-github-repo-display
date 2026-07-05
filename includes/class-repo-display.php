@@ -217,6 +217,8 @@ class KGRD_Repo_Display {
 	 */
 	private function display_card( $data ) {
 		// Determine title: prefer readme_title, fetch if not available, fallback to name.
+		// The README fetch is served by the API-layer cache (transient + request
+		// memo), so at most one HTTP request per repository per cache period.
 		if ( ! empty( $data['readme_title'] ) ) {
 			$raw_title = $data['readme_title'];
 		} else {
@@ -528,20 +530,24 @@ class KGRD_Repo_Display {
 		$username = $data['owner']['login'];
 		$repo     = $data['name'];
 
-		// Determine the correct license to display.
-		$license = '';
-		if ( ! empty( $data['custom_license'] ) ) {
-			// Use custom license provided via shortcode.
-			$license = $data['custom_license'];
-		} elseif ( ! empty( $data['license']['spdx_id'] ) && 'NOASSERTION' !== $data['license']['spdx_id'] ) {
-			// Use GitHub API license if valid.
-			$license = $data['license']['spdx_id'];
-		} else {
-			// Try to extract from README.
-			$api = KGRD_GitHub_API::get_instance();
-			$readme = $api->get_readme( $username, $repo );
-			if ( ! is_wp_error( $readme ) ) {
-				$license = $this->extract_license_from_readme( $readme );
+		// Determine the correct license to display (only when the license badge is enabled,
+		// to avoid a README fetch whose result would be discarded).
+		$license         = '';
+		$license_enabled = get_option( 'kgrd_badge_license', 1 );
+		if ( $license_enabled ) {
+			if ( ! empty( $data['custom_license'] ) ) {
+				// Use custom license provided via shortcode.
+				$license = $data['custom_license'];
+			} elseif ( ! empty( $data['license']['spdx_id'] ) && 'NOASSERTION' !== $data['license']['spdx_id'] ) {
+				// Use GitHub API license if valid.
+				$license = $data['license']['spdx_id'];
+			} else {
+				// Try to extract from README.
+				$api = KGRD_GitHub_API::get_instance();
+				$readme = $api->get_readme( $username, $repo );
+				if ( ! is_wp_error( $readme ) ) {
+					$license = $this->extract_license_from_readme( $readme );
+				}
 			}
 		}
 
@@ -559,33 +565,37 @@ class KGRD_Repo_Display {
 		}
 
 		// Generate release_date badge: use latest release date or repository created date.
+		// The API call is made only when the badge is actually enabled, so the
+		// result is never fetched just to be discarded by the filter below.
 		$release_date_badge = '';
-		$date = '';
-		$label = '';
+		if ( get_option( 'kgrd_badge_release_date', 0 ) ) {
+			$date = '';
+			$label = '';
 
-		// First try to get the latest release
-		$api = KGRD_GitHub_API::get_instance();
-		$latest_release = $api->get_latest_release( $username, $repo );
+			// First try to get the latest release
+			$api = KGRD_GitHub_API::get_instance();
+			$latest_release = $api->get_latest_release( $username, $repo );
 
-		if ( ! is_wp_error( $latest_release ) && ! empty( $latest_release['published_at'] ) ) {
-			// Use latest release date.
-			$date = gmdate( 'Y-m-d', strtotime( $latest_release['published_at'] ) );
-			$label = 'latest_release';
-		} elseif ( ! empty( $data['created_at'] ) ) {
-			// Use repository created date.
-			$date = gmdate( 'Y-m-d', strtotime( $data['created_at'] ) );
-			$label = 'created';
-		}
+			if ( ! is_wp_error( $latest_release ) && ! empty( $latest_release['published_at'] ) ) {
+				// Use latest release date.
+				$date = gmdate( 'Y-m-d', strtotime( $latest_release['published_at'] ) );
+				$label = 'latest_release';
+			} elseif ( ! empty( $data['created_at'] ) ) {
+				// Use repository created date.
+				$date = gmdate( 'Y-m-d', strtotime( $data['created_at'] ) );
+				$label = 'created';
+			}
 
-		if ( ! empty( $date ) && ! empty( $label ) ) {
-			// Shields.io requires hyphens to be escaped as double hyphens.
-			$escaped_date = str_replace( '-', '--', $date );
+			if ( ! empty( $date ) && ! empty( $label ) ) {
+				// Shields.io requires hyphens to be escaped as double hyphens.
+				$escaped_date = str_replace( '-', '--', $date );
 
-			$release_date_badge = sprintf(
-				'https://img.shields.io/badge/%s-%s-blue',
-				rawurlencode( $label ),
-				rawurlencode( $escaped_date )
-			);
+				$release_date_badge = sprintf(
+					'https://img.shields.io/badge/%s-%s-blue',
+					rawurlencode( $label ),
+					rawurlencode( $escaped_date )
+				);
+			}
 		}
 
 		// すべての利用可能なバッジURL
@@ -630,8 +640,10 @@ class KGRD_Repo_Display {
 
 		$badges_html = '';
 		foreach ( $badge_urls as $key => $url ) {
+			// height is fixed (shields.io badges are 20px tall) to reserve layout
+			// space and avoid cumulative layout shift while images load.
 			$badges_html .= sprintf(
-				'<img src="%s" alt="%s" class="kgrd-card__badge" loading="lazy">',
+				'<img src="%s" alt="%s" class="kgrd-card__badge" height="20" loading="lazy" decoding="async">',
 				esc_url( $url ),
 				esc_attr( ucfirst( str_replace( '_', ' ', $key ) ) . ' badge' )
 			);

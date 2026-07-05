@@ -148,38 +148,72 @@ class KGRD_Repo_Detail_Page {
 			$data        = $cached_data['data'];
 			$readme_html = $cached_data['readme_html'];
 		} else {
-			// Get repository data from API.
-			$api  = KGRD_GitHub_API::get_instance();
-			$data = $api->get_repository( $username, $repo );
+			// Build (and cache) the detail page data.
+			$result = $this->build_detail_cache( $username, $repo );
 
-			if ( is_wp_error( $data ) ) {
-				$this->render_error_page( $data->get_error_message() );
+			if ( is_wp_error( $result ) ) {
+				$this->render_error_page( $result->get_error_message() );
 				exit;
 			}
 
-			// Get README content.
-			$readme_content = $api->get_readme( $username, $repo );
-			if ( is_wp_error( $readme_content ) ) {
-				$readme_html = '<p>' . esc_html__( 'README not found.', 'kashiwazaki-github-repo-display' ) . '</p>';
-			} else {
-				$readme_html = $this->parse_markdown( $readme_content, $username, $repo );
-			}
-
-			// Cache the data.
-			$cache_duration = $this->get_cache_duration();
-			set_transient(
-				$cache_key,
-				array(
-					'data'        => $data,
-					'readme_html' => $readme_html,
-				),
-				$cache_duration
-			);
+			$data        = $result['data'];
+			$readme_html = $result['readme_html'];
 		}
 
 		// Render the page.
 		$this->render_detail_page( $data, $readme_html, $username, $repo );
 		exit;
+	}
+
+	/**
+	 * Build and cache the detail page data for a repository.
+	 *
+	 * @param string $username GitHub username.
+	 * @param string $repo Repository name.
+	 * @return array|WP_Error Array with 'data' and 'readme_html', or error.
+	 */
+	private function build_detail_cache( $username, $repo ) {
+		$api  = KGRD_GitHub_API::get_instance();
+		$data = $api->get_repository( $username, $repo );
+
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
+
+		// Get README content (served from the API-layer cache when warm).
+		$readme_content = $api->get_readme( $username, $repo );
+		if ( is_wp_error( $readme_content ) ) {
+			$readme_html = '<p>' . esc_html__( 'README not found.', 'kashiwazaki-github-repo-display' ) . '</p>';
+		} else {
+			$readme_html = $this->parse_markdown( $readme_content, $username, $repo );
+		}
+
+		$result = array(
+			'data'        => $data,
+			'readme_html' => $readme_html,
+		);
+
+		set_transient(
+			'kgrd_detail_' . md5( $username . '/' . $repo ),
+			$result,
+			$this->get_cache_duration()
+		);
+
+		return $result;
+	}
+
+	/**
+	 * Pre-warm the detail page cache for a repository (used by the cron refresh).
+	 *
+	 * @param string $username GitHub username.
+	 * @param string $repo Repository name.
+	 * @return array|WP_Error Built cache payload or error.
+	 */
+	public static function warm_cache( $username, $repo ) {
+		$username = sanitize_text_field( $username );
+		$repo     = sanitize_text_field( $repo );
+
+		return self::get_instance()->build_detail_cache( $username, $repo );
 	}
 
 	/**

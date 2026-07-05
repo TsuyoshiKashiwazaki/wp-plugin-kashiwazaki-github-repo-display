@@ -32,6 +32,16 @@ class KGRD_GitHub_API {
 	private static $instance = null;
 
 	/**
+	 * Request-scope memoization for API responses (including errors).
+	 *
+	 * Prevents duplicate HTTP requests for the same resource within a single
+	 * page load, and avoids hammering the API repeatedly when a request fails.
+	 *
+	 * @var array
+	 */
+	private static $memo = array();
+
+	/**
 	 * Get the single instance of the class.
 	 *
 	 * @return KGRD_GitHub_API
@@ -186,12 +196,21 @@ class KGRD_GitHub_API {
 	 * @param string $repo Repository name.
 	 * @return array|WP_Error Repository data or error.
 	 */
-	public function get_repository( $username, $repo ) {
+	public function get_repository( $username, $repo, $force_refresh = false ) {
 		// Sanitize inputs.
 		$username = sanitize_text_field( $username );
 		$repo     = sanitize_text_field( $repo );
 
-		// Note: Repository-level caching is disabled. Shortcode output caching provides sufficient performance.
+		// Check cache first (request memo + transient). When $force_refresh is
+		// set (cron refresh), the cache is bypassed and only overwritten on a
+		// successful fetch, so a failed refresh never destroys warm data.
+		$cache_key = $this->get_cache_key( $username, $repo );
+		if ( ! $force_refresh ) {
+			$cached = $this->api_cache_get( $cache_key );
+			if ( null !== $cached ) {
+				return $cached;
+			}
+		}
 
 		// Fetch from API.
 		$url      = sprintf( '%s/repos/%s/%s', $this->api_base, $username, $repo );
@@ -220,6 +239,7 @@ class KGRD_GitHub_API {
 
 		// Check for errors.
 		if ( is_wp_error( $response ) ) {
+			$this->api_cache_set( $cache_key, $response );
 			return $response;
 		}
 
@@ -233,7 +253,7 @@ class KGRD_GitHub_API {
 			$rate_limit_reset = isset( $headers['x-ratelimit-reset'] ) ? $headers['x-ratelimit-reset'] : 0;
 
 			if ( 0 == $remaining ) {
-				return new WP_Error(
+				$error = new WP_Error(
 					'rate_limit_exceeded',
 					sprintf(
 						/* translators: %s: Time until rate limit reset */
@@ -241,12 +261,14 @@ class KGRD_GitHub_API {
 						date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $rate_limit_reset )
 					)
 				);
+				$this->api_cache_set( $cache_key, $error );
+				return $error;
 			}
 		}
 
 		// Handle not found.
 		if ( 404 === $response_code ) {
-			return new WP_Error(
+			$error = new WP_Error(
 				'repo_not_found',
 				sprintf(
 					/* translators: 1: username, 2: repository name */
@@ -255,11 +277,13 @@ class KGRD_GitHub_API {
 					$repo
 				)
 			);
+			$this->api_cache_set( $cache_key, $error );
+			return $error;
 		}
 
 		// Handle other errors.
 		if ( $response_code >= 400 ) {
-			return new WP_Error(
+			$error = new WP_Error(
 				'api_error',
 				sprintf(
 					/* translators: %d: HTTP response code */
@@ -267,42 +291,63 @@ class KGRD_GitHub_API {
 					$response_code
 				)
 			);
+			$this->api_cache_set( $cache_key, $error );
+			return $error;
 		}
 
 		$data = json_decode( $body, true );
 
 		if ( null === $data ) {
-			return new WP_Error(
+			$error = new WP_Error(
 				'invalid_response',
 				__( 'Invalid response from GitHub API.', 'kashiwazaki-github-repo-display' )
 			);
+			$this->api_cache_set( $cache_key, $error );
+			return $error;
+		}
+
+		// During a force refresh, keep the previous enrichment values when a
+		// sub-fetch fails, so a transient sub-endpoint error never degrades the
+		// warm aggregate cache (e.g. download_url falling back to the default
+		// branch just because the tag lookup failed once).
+		$previous = $force_refresh ? get_transient( $cache_key ) : false;
+		if ( ! is_array( $previous ) ) {
+			$previous = array();
 		}
 
 		// Get README content.
-		$readme = $this->get_readme( $username, $repo );
+		$readme = $this->get_readme( $username, $repo, $force_refresh );
 		if ( ! is_wp_error( $readme ) ) {
 			$data['readme_title'] = $this->extract_readme_title( $readme );
+		} elseif ( 'readme_not_found' !== $readme->get_error_code() && isset( $previous['readme_title'] ) ) {
+			$data['readme_title'] = $previous['readme_title'];
 		}
 
 		// Get readme.txt content if it exists (for WordPress plugins/themes).
-		$readme_txt = $this->get_file_contents( $username, $repo, 'readme.txt' );
+		$readme_txt = $this->get_file_contents( $username, $repo, 'readme.txt', $force_refresh );
 		if ( ! is_wp_error( $readme_txt ) && ! empty( $readme_txt ) ) {
 			// Store the entire readme.txt content
 			$data['readme_txt_content'] = $readme_txt;
+		} elseif ( is_wp_error( $readme_txt ) && 'file_not_found' !== $readme_txt->get_error_code() && isset( $previous['readme_txt_content'] ) ) {
+			$data['readme_txt_content'] = $previous['readme_txt_content'];
 		}
 
 		// Get latest tag/release for download URL.
-		$latest_tag = $this->get_latest_tag( $username, $repo );
+		$latest_tag = $this->get_latest_tag( $username, $repo, $force_refresh );
 		if ( ! is_wp_error( $latest_tag ) && ! empty( $latest_tag ) ) {
 			$data['download_url'] = sprintf( 'https://github.com/%s/%s/archive/refs/tags/%s.zip', $username, $repo, $latest_tag );
+		} elseif ( is_wp_error( $latest_tag ) && 'tags_not_found' !== $latest_tag->get_error_code() && ! empty( $previous['download_url'] ) ) {
+			// Transient lookup failure: keep the previously known download URL.
+			$data['download_url'] = $previous['download_url'];
 		} else {
 			// Fallback to default branch zip.
 			$default_branch = ! empty( $data['default_branch'] ) ? $data['default_branch'] : 'main';
 			$data['download_url'] = sprintf( 'https://github.com/%s/%s/archive/refs/heads/%s.zip', $username, $repo, $default_branch );
 		}
 
-		// Note: Repository data caching is disabled due to data validation issues.
-		// Shortcode output caching (which works perfectly) is sufficient for performance.
+		// Cache the enriched repository data (readme_title / readme_txt_content / download_url included).
+		$this->api_cache_set( $cache_key, $data );
+
 		return $data;
 	}
 
@@ -314,10 +359,19 @@ class KGRD_GitHub_API {
 	 * @param string $path File path in repository.
 	 * @return string|WP_Error File content or error.
 	 */
-	public function get_file_contents( $username, $repo, $path ) {
+	public function get_file_contents( $username, $repo, $path, $force_refresh = false ) {
 		$username = sanitize_text_field( $username );
 		$repo     = sanitize_text_field( $repo );
 		$path     = sanitize_text_field( $path );
+
+		// Check cache first (request memo + transient).
+		$cache_key = $this->build_api_cache_key( 'kgrd_file_', array( $username, $repo, $path ) );
+		if ( ! $force_refresh ) {
+			$cached = $this->api_cache_get( $cache_key );
+			if ( null !== $cached ) {
+				return $cached;
+			}
+		}
 
 		$url     = sprintf( '%s/repos/%s/%s/contents/%s', $this->api_base, $username, $repo, $path );
 		$headers = array(
@@ -344,17 +398,20 @@ class KGRD_GitHub_API {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			$this->api_cache_set( $cache_key, $response );
 			return $response;
 		}
 
 		$response_code = wp_remote_retrieve_response_code( $response );
 
 		if ( 404 === $response_code ) {
-			return new WP_Error( 'file_not_found', __( 'File not found.', 'kashiwazaki-github-repo-display' ) );
+			$error = new WP_Error( 'file_not_found', __( 'File not found.', 'kashiwazaki-github-repo-display' ) );
+			$this->api_cache_set( $cache_key, $error );
+			return $error;
 		}
 
 		if ( $response_code >= 400 ) {
-			return new WP_Error(
+			$error = new WP_Error(
 				'api_error',
 				sprintf(
 					/* translators: %d: HTTP response code */
@@ -362,9 +419,14 @@ class KGRD_GitHub_API {
 					$response_code
 				)
 			);
+			$this->api_cache_set( $cache_key, $error );
+			return $error;
 		}
 
-		return wp_remote_retrieve_body( $response );
+		$body = wp_remote_retrieve_body( $response );
+		$this->api_cache_set( $cache_key, $body );
+
+		return $body;
 	}
 
 	/**
@@ -374,9 +436,18 @@ class KGRD_GitHub_API {
 	 * @param string $repo Repository name.
 	 * @return string|WP_Error README content or error.
 	 */
-	public function get_readme( $username, $repo ) {
+	public function get_readme( $username, $repo, $force_refresh = false ) {
 		$username = sanitize_text_field( $username );
 		$repo     = sanitize_text_field( $repo );
+
+		// Check cache first (request memo + transient).
+		$cache_key = $this->build_api_cache_key( 'kgrd_readme_', array( $username, $repo ) );
+		if ( ! $force_refresh ) {
+			$cached = $this->api_cache_get( $cache_key );
+			if ( null !== $cached ) {
+				return $cached;
+			}
+		}
 
 		$url     = sprintf( '%s/repos/%s/%s/readme', $this->api_base, $username, $repo );
 		$headers = array(
@@ -403,17 +474,20 @@ class KGRD_GitHub_API {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			$this->api_cache_set( $cache_key, $response );
 			return $response;
 		}
 
 		$response_code = wp_remote_retrieve_response_code( $response );
 
 		if ( 404 === $response_code ) {
-			return new WP_Error( 'readme_not_found', __( 'README not found.', 'kashiwazaki-github-repo-display' ) );
+			$error = new WP_Error( 'readme_not_found', __( 'README not found.', 'kashiwazaki-github-repo-display' ) );
+			$this->api_cache_set( $cache_key, $error );
+			return $error;
 		}
 
 		if ( $response_code >= 400 ) {
-			return new WP_Error(
+			$error = new WP_Error(
 				'api_error',
 				sprintf(
 					/* translators: %d: HTTP response code */
@@ -421,9 +495,14 @@ class KGRD_GitHub_API {
 					$response_code
 				)
 			);
+			$this->api_cache_set( $cache_key, $error );
+			return $error;
 		}
 
-		return wp_remote_retrieve_body( $response );
+		$body = wp_remote_retrieve_body( $response );
+		$this->api_cache_set( $cache_key, $body );
+
+		return $body;
 	}
 
 	/**
@@ -492,9 +571,18 @@ class KGRD_GitHub_API {
 	 * @param string $repo Repository name.
 	 * @return array|WP_Error Latest release data or error.
 	 */
-	public function get_latest_release( $username, $repo ) {
+	public function get_latest_release( $username, $repo, $force_refresh = false ) {
 		$username = sanitize_text_field( $username );
 		$repo     = sanitize_text_field( $repo );
+
+		// Check cache first (request memo + transient).
+		$cache_key = $this->build_api_cache_key( 'kgrd_release_', array( $username, $repo ) );
+		if ( ! $force_refresh ) {
+			$cached = $this->api_cache_get( $cache_key );
+			if ( null !== $cached ) {
+				return $cached;
+			}
+		}
 
 		$url     = sprintf( '%s/repos/%s/%s/releases/latest', $this->api_base, $username, $repo );
 		$headers = array(
@@ -521,6 +609,7 @@ class KGRD_GitHub_API {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			$this->api_cache_set( $cache_key, $response );
 			return $response;
 		}
 
@@ -528,11 +617,12 @@ class KGRD_GitHub_API {
 
 		if ( 404 === $response_code ) {
 			// No releases found - this is not an error, just return empty.
+			$this->api_cache_set( $cache_key, array() );
 			return array();
 		}
 
 		if ( $response_code >= 400 ) {
-			return new WP_Error(
+			$error = new WP_Error(
 				'api_error',
 				sprintf(
 					/* translators: %d: HTTP response code */
@@ -540,13 +630,17 @@ class KGRD_GitHub_API {
 					$response_code
 				)
 			);
+			$this->api_cache_set( $cache_key, $error );
+			return $error;
 		}
 
 		$data = json_decode( wp_remote_retrieve_body( $response ), true );
 
 		if ( empty( $data ) || ! is_array( $data ) ) {
-			return array();
+			$data = array();
 		}
+
+		$this->api_cache_set( $cache_key, $data );
 
 		return $data;
 	}
@@ -558,9 +652,27 @@ class KGRD_GitHub_API {
 	 * @param string $repo Repository name.
 	 * @return string|WP_Error Latest tag name or error.
 	 */
-	public function get_latest_tag( $username, $repo ) {
+	public function get_latest_tag( $username, $repo, $force_refresh = false ) {
 		$username = sanitize_text_field( $username );
 		$repo     = sanitize_text_field( $repo );
+
+		// Check cache first (request memo + transient).
+		$cache_key = $this->build_api_cache_key( 'kgrd_tag_', array( $username, $repo ) );
+		if ( ! $force_refresh ) {
+			$cached = $this->api_cache_get( $cache_key );
+			if ( null !== $cached ) {
+				return $cached;
+			}
+		}
+
+		// First, try the latest release (most reliable for versioned releases).
+		// Reuses get_latest_release() so the same endpoint is never fetched
+		// twice within a request (memo + transient cache).
+		$release = $this->get_latest_release( $username, $repo, $force_refresh );
+		if ( ! is_wp_error( $release ) && ! empty( $release['tag_name'] ) ) {
+			$this->api_cache_set( $cache_key, $release['tag_name'] );
+			return $release['tag_name'];
+		}
 
 		$headers = array(
 			'Accept' => 'application/vnd.github.v3+json',
@@ -577,23 +689,6 @@ class KGRD_GitHub_API {
 			}
 		}
 
-		// First, try to get the latest release (most reliable for versioned releases).
-		$release_url = sprintf( '%s/repos/%s/%s/releases/latest', $this->api_base, $username, $repo );
-		$response    = wp_remote_get(
-			$release_url,
-			array(
-				'timeout' => 15,
-				'headers' => $headers,
-			)
-		);
-
-		if ( ! is_wp_error( $response ) && 200 === wp_remote_retrieve_response_code( $response ) ) {
-			$release = json_decode( wp_remote_retrieve_body( $response ), true );
-			if ( ! empty( $release['tag_name'] ) ) {
-				return $release['tag_name'];
-			}
-		}
-
 		// Fallback to tags API if no releases exist.
 		$tags_url = sprintf( '%s/repos/%s/%s/tags', $this->api_base, $username, $repo );
 		$response = wp_remote_get(
@@ -605,17 +700,20 @@ class KGRD_GitHub_API {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			$this->api_cache_set( $cache_key, $response );
 			return $response;
 		}
 
 		$response_code = wp_remote_retrieve_response_code( $response );
 
 		if ( 404 === $response_code ) {
-			return new WP_Error( 'tags_not_found', __( 'No tags found.', 'kashiwazaki-github-repo-display' ) );
+			$error = new WP_Error( 'tags_not_found', __( 'No tags found.', 'kashiwazaki-github-repo-display' ) );
+			$this->api_cache_set( $cache_key, $error );
+			return $error;
 		}
 
 		if ( $response_code >= 400 ) {
-			return new WP_Error(
+			$error = new WP_Error(
 				'api_error',
 				sprintf(
 					/* translators: %d: HTTP response code */
@@ -623,15 +721,20 @@ class KGRD_GitHub_API {
 					$response_code
 				)
 			);
+			$this->api_cache_set( $cache_key, $error );
+			return $error;
 		}
 
 		$tags = json_decode( wp_remote_retrieve_body( $response ), true );
 
 		if ( empty( $tags ) || ! is_array( $tags ) ) {
+			$this->api_cache_set( $cache_key, '' );
 			return '';
 		}
 
 		// Return the first tag (note: tags API order is not guaranteed to be latest first).
+		$this->api_cache_set( $cache_key, $tags[0]['name'] );
+
 		return $tags[0]['name'];
 	}
 
@@ -676,7 +779,69 @@ class KGRD_GitHub_API {
 	 */
 	private function get_cache_key( $username, $repo ) {
 		// Use md5 hash to keep key length under 64 chars (WordPress option name limit).
-		return 'kgrd_repo_' . md5( strtolower( $username ) . '|' . strtolower( $repo ) );
+		return 'kgrd_repo_' . md5( strtolower( $username ) . '|' . strtolower( $repo ) . $this->get_token_fingerprint() );
+	}
+
+	/**
+	 * Build a namespaced cache key for an API resource.
+	 *
+	 * Includes a token fingerprint so cached data is invalidated when the
+	 * authentication token changes (e.g. private repos becoming inaccessible).
+	 *
+	 * @param string $prefix Key prefix (e.g. 'kgrd_readme_').
+	 * @param array  $parts Key parts (username, repo, path, ...).
+	 * @return string Cache key.
+	 */
+	private function build_api_cache_key( $prefix, $parts ) {
+		return $prefix . md5( strtolower( implode( '|', $parts ) ) . $this->get_token_fingerprint() );
+	}
+
+	/**
+	 * Get a short fingerprint of the configured token for cache keying.
+	 *
+	 * @return string Fingerprint or empty string when no token is set.
+	 */
+	private function get_token_fingerprint() {
+		$token = get_option( 'kgrd_github_token', '' );
+		return empty( $token ) ? '' : '|' . substr( md5( $token ), 0, 8 );
+	}
+
+	/**
+	 * Get a cached API response (request memo first, then transient).
+	 *
+	 * @param string $cache_key Cache key.
+	 * @return mixed Cached value, or null when not cached.
+	 */
+	private function api_cache_get( $cache_key ) {
+		if ( array_key_exists( $cache_key, self::$memo ) ) {
+			return self::$memo[ $cache_key ];
+		}
+
+		$cached = get_transient( $cache_key );
+		if ( false !== $cached ) {
+			self::$memo[ $cache_key ] = $cached;
+			return $cached;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Store an API response in the request memo and, for successes, in a transient.
+	 *
+	 * WP_Error values are memoized for the current request only so a failing
+	 * endpoint is not re-fetched dozens of times in one page load, but errors
+	 * are never persisted.
+	 *
+	 * @param string $cache_key Cache key.
+	 * @param mixed  $value Value to cache.
+	 */
+	private function api_cache_set( $cache_key, $value ) {
+		self::$memo[ $cache_key ] = $value;
+
+		if ( ! is_wp_error( $value ) ) {
+			set_transient( $cache_key, $value, $this->get_cache_expiration() );
+		}
 	}
 
 	/**
@@ -737,8 +902,23 @@ class KGRD_GitHub_API {
 	 * @return bool True on success, false on failure.
 	 */
 	public function clear_cache( $username, $repo ) {
-		$cache_key = $this->get_cache_key( $username, $repo );
-		return delete_transient( $cache_key );
+		$keys = array(
+			$this->get_cache_key( $username, $repo ),
+			$this->build_api_cache_key( 'kgrd_readme_', array( $username, $repo ) ),
+			$this->build_api_cache_key( 'kgrd_release_', array( $username, $repo ) ),
+			$this->build_api_cache_key( 'kgrd_tag_', array( $username, $repo ) ),
+			$this->build_api_cache_key( 'kgrd_file_', array( $username, $repo, 'readme.txt' ) ),
+		);
+
+		$deleted = false;
+		foreach ( $keys as $key ) {
+			if ( delete_transient( $key ) ) {
+				$deleted = true;
+			}
+			unset( self::$memo[ $key ] );
+		}
+
+		return $deleted;
 	}
 
 	/**
@@ -749,14 +929,18 @@ class KGRD_GitHub_API {
 	public function clear_all_cache() {
 		global $wpdb;
 
-		// Clear shortcode output cache (repository data cache is disabled)
+		// Clear all plugin caches: shortcode output, API layer (repo/readme/file/release/tag),
+		// user repos list and detail page caches.
 		$output_count = $wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
-				'_transient_kgrd_output_%',
-				'_transient_timeout_kgrd_output_%'
+				'_transient_kgrd_%',
+				'_transient_timeout_kgrd_%'
 			)
 		);
+
+		// Reset the request-scope memo as well.
+		self::$memo = array();
 
 		return absint( $output_count / 2 ); // Divide by 2 because each transient has a timeout entry.
 	}

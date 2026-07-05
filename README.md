@@ -2,7 +2,7 @@
 
 A powerful WordPress plugin that displays GitHub repository information dynamically on your WordPress site. Simply specify a repository name to fetch and display the latest information from the GitHub API.
 
-![WordPress Plugin Version](https://img.shields.io/badge/version-1.0.2-blue.svg)
+![WordPress Plugin Version](https://img.shields.io/badge/version-1.0.3-blue.svg)
 ![WordPress Compatibility](https://img.shields.io/badge/wordpress-5.0%2B-blue.svg)
 ![PHP Version](https://img.shields.io/badge/php-7.2%2B-purple.svg)
 ![License](https://img.shields.io/badge/license-GPL--2.0%2B-green.svg)

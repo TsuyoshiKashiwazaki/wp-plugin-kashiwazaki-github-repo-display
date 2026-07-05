@@ -5,6 +5,18 @@ All notable changes to the Kashiwazaki GitHub Repository Display plugin will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-07-06
+
+### Fixed
+- Significantly improved page load performance by restoring API response caching. Repository data (repository info, README, releases, tags, file contents) is now cached and reused instead of being re-fetched from the GitHub API on every page view, with request-scope memoization to deduplicate calls within a single request.
+- Background cache refresh (WP-Cron) now correctly pre-warms the API and detail-page caches in batches using a rebuild-then-replace strategy, and self-heals its schedule, so visitors no longer trigger a full cold rebuild.
+
+### Changed
+- Badge-related API requests (license, release date) are now made only when the corresponding badge is enabled, avoiding unnecessary requests.
+- Tag lookup now reuses the latest-release request to eliminate duplicate API calls.
+- Badge images now load lazily (`loading="lazy"` and `decoding="async"`).
+- Admin settings and readme now clarify that a GitHub token only raises the API rate limit (60/hour to 5,000/hour) and does not make pages load faster.
+
 ## [1.0.2] - 2026-04-10
 
 ### Added
@@ -249,7 +261,8 @@ Developed by [Tsuyoshi Kashiwazaki](https://www.tsuyoshikashiwazaki.jp/)
 
 ---
 
-[1.0.2]: https://github.com/TsuyoshiKashiwazaki/kashiwazaki-github-repo-display/releases/tag/1.0.2
-[1.0.1]: https://github.com/TsuyoshiKashiwazaki/kashiwazaki-github-repo-display/releases/tag/1.0.1
-[1.0.0]: https://github.com/TsuyoshiKashiwazaki/kashiwazaki-github-repo-display/releases/tag/1.0.0
-[Unreleased]: https://github.com/TsuyoshiKashiwazaki/kashiwazaki-github-repo-display/compare/1.0.2...HEAD
+[1.0.3]: https://github.com/TsuyoshiKashiwazaki/wp-plugin-kashiwazaki-github-repo-display/releases/tag/1.0.3
+[1.0.2]: https://github.com/TsuyoshiKashiwazaki/wp-plugin-kashiwazaki-github-repo-display/releases/tag/1.0.2
+[1.0.1]: https://github.com/TsuyoshiKashiwazaki/wp-plugin-kashiwazaki-github-repo-display/releases/tag/1.0.1
+[1.0.0]: https://github.com/TsuyoshiKashiwazaki/wp-plugin-kashiwazaki-github-repo-display/releases/tag/1.0.0
+[Unreleased]: https://github.com/TsuyoshiKashiwazaki/wp-plugin-kashiwazaki-github-repo-display/compare/1.0.3...HEAD

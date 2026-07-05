@@ -485,7 +485,8 @@ class KGRD_Admin_Settings {
 			autocomplete="off"
 		/>
 		<p class="description">
-			APIレート制限を回避するためのトークン（オプション）。<a href="https://github.com/settings/tokens" target="_blank">GitHubで作成</a>してください。
+			APIレート制限を回避するためのトークン（オプション）。<a href="https://github.com/settings/tokens" target="_blank">GitHubで作成</a>してください。<br>
+			トークンはレート上限の緩和（60回/時 → 5,000回/時）のためのもので、ページの表示速度は変わりません。表示速度はキャッシュ設定に依存します。
 		</p>
 		<?php
 	}
@@ -630,6 +631,15 @@ class KGRD_Admin_Settings {
 				<?php endif; ?>
 			</ul>
 		</div>
+
+		<?php if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) : ?>
+			<div style="margin-top: 12px; padding: 12px; background: #fcf0f1; border-left: 4px solid #d63638; border-radius: 4px;">
+				<p style="margin: 0;">
+					<strong>警告:</strong> この環境では <code>DISABLE_WP_CRON</code> が有効なため、WP-Cron はページアクセスでは実行されません。<br>
+					サーバーの cron 等で <code>wp-cron.php</code>（または WP-CLI の <code>wp cron event run --due-now</code>）を定期実行しない限り、キャッシュ自動更新は動作しません。
+				</p>
+			</div>
+		<?php endif; ?>
 
 		<p class="description" style="margin-top: 12px;">
 			バックグラウンドで定期的にキャッシュを更新し、ユーザーアクセス時の負荷を軽減します。<br>

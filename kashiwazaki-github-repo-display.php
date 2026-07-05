@@ -3,7 +3,7 @@
  * Plugin Name: Kashiwazaki GitHub Repository Display
  * Plugin URI: https://www.tsuyoshikashiwazaki.jp/
  * Description: Display GitHub repository information dynamically on your WordPress site. Simply specify a repository name to fetch and display the latest information from the GitHub API.
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author: Tsuyoshi Kashiwazaki
  * Author URI: https://www.tsuyoshikashiwazaki.jp/
  * License: GPL v2 or later
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'KGRD_VERSION', '1.0.2' );
+define( 'KGRD_VERSION', '1.0.3' );
 define( 'KGRD_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KGRD_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'KGRD_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
@@ -77,8 +77,9 @@ class Kashiwazaki_GitHub_Repo_Display {
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
 		add_action( 'init', array( $this, 'init' ) );
 
-		// Register cron hook.
+		// Register cron hooks.
 		add_action( 'kgrd_cache_refresh_event', array( $this, 'run_cache_refresh' ) );
+		add_action( 'kgrd_cache_refresh_batch', array( $this, 'process_refresh_batch' ) );
 
 		// Add custom cron schedule.
 		add_filter( 'cron_schedules', array( $this, 'add_cron_schedules' ) );
@@ -103,6 +104,13 @@ class Kashiwazaki_GitHub_Repo_Display {
 	 * Initialize plugin components.
 	 */
 	public function init() {
+		// Self-heal the cron schedule: the event is normally registered when
+		// settings are saved, but it can be missing (e.g. plugin updated by
+		// file replacement, or activation happened before the option was set).
+		if ( get_option( 'kgrd_enable_cron_refresh', 0 ) && ! wp_next_scheduled( 'kgrd_cache_refresh_event' ) ) {
+			self::schedule_cron_event();
+		}
+
 		// Initialize shortcodes.
 		KGRD_Shortcodes::get_instance();
 
@@ -126,6 +134,11 @@ class Kashiwazaki_GitHub_Repo_Display {
 		}
 		if ( ! get_option( 'kgrd_cache_expiration' ) ) {
 			update_option( 'kgrd_cache_expiration', 6 );
+		}
+
+		// Register the cache refresh event when the feature is enabled.
+		if ( get_option( 'kgrd_enable_cron_refresh', 0 ) ) {
+			self::schedule_cron_event();
 		}
 
 		// Flush rewrite rules.
@@ -182,6 +195,9 @@ class Kashiwazaki_GitHub_Repo_Display {
 		if ( $timestamp ) {
 			wp_unschedule_event( $timestamp, 'kgrd_cache_refresh_event' );
 		}
+
+		// Clear any pending chained batch events regardless of their args.
+		wp_unschedule_hook( 'kgrd_cache_refresh_batch' );
 	}
 
 	/**
@@ -197,7 +213,12 @@ class Kashiwazaki_GitHub_Repo_Display {
 	}
 
 	/**
-	 * Run the cache refresh process.
+	 * Run the cache refresh process (entry point of the recurring event).
+	 *
+	 * Refresh is "rebuild then replace": repository data is re-fetched into the
+	 * API-layer caches first, and only after everything is warm are the rendered
+	 * output caches invalidated, so visitors never hit a fully cold rebuild.
+	 * Repositories are processed in batches to keep each cron request short.
 	 */
 	public function run_cache_refresh() {
 		// Check if cron refresh is enabled.
@@ -206,44 +227,75 @@ class Kashiwazaki_GitHub_Repo_Display {
 			return;
 		}
 
-		// Get tracked repositories.
+		$this->process_refresh_batch( 0 );
+	}
+
+	/**
+	 * Process one batch of the cache refresh, scheduling a follow-up batch if needed.
+	 *
+	 * @param int $offset Offset into the tracked repositories list.
+	 */
+	public function process_refresh_batch( $offset = 0 ) {
+		// Re-check on every batch: the setting may have been disabled while
+		// a chained batch event was still pending.
+		if ( ! get_option( 'kgrd_enable_cron_refresh', 0 ) ) {
+			return;
+		}
+
+		$batch_size    = 10;
+		$offset        = absint( $offset );
 		$tracked_repos = get_option( 'kgrd_tracked_repositories', array() );
 		if ( empty( $tracked_repos ) ) {
 			return;
 		}
 
-		$api = KGRD_GitHub_API::get_instance();
+		$batch = array_slice( $tracked_repos, $offset, $batch_size, true );
+		$api   = KGRD_GitHub_API::get_instance();
 
-		// Clear output cache for tracked repositories.
-		$this->clear_output_cache_for_repos( $tracked_repos );
+		foreach ( $batch as $repo_key => $repo_info ) {
+			// Force-refresh: bypasses the cache on read but only overwrites it
+			// on a successful fetch, so warm data survives API failures.
+			$data = $api->get_repository( $repo_info['username'], $repo_info['repo'], true );
 
-		foreach ( $tracked_repos as $repo_key => $repo_info ) {
-			// Fetch fresh data from GitHub API.
-			$api->get_repository( $repo_info['username'], $repo_info['repo'] );
+			// Pre-warm the detail page cache from the (now warm) API caches.
+			if ( ! is_wp_error( $data ) && class_exists( 'KGRD_Repo_Detail_Page' ) ) {
+				KGRD_Repo_Detail_Page::warm_cache( $repo_info['username'], $repo_info['repo'] );
+			}
 
 			// Small delay to avoid rate limiting.
-			usleep( 500000 ); // 0.5 seconds.
+			usleep( 200000 ); // 0.2 seconds.
 		}
+
+		if ( $offset + $batch_size < count( $tracked_repos ) ) {
+			// More repositories to process: continue in a follow-up batch.
+			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'kgrd_cache_refresh_batch', array( $offset + $batch_size ) );
+			return;
+		}
+
+		// All API caches are warm: invalidate the rendered output caches last.
+		// The next page view re-renders from warm API data without HTTP calls.
+		$this->clear_rendered_output_cache();
 
 		// Update last refresh time.
 		update_option( 'kgrd_last_cron_refresh', time() );
 	}
 
 	/**
-	 * Clear output cache for specific repositories.
+	 * Clear rendered output caches (shortcode output and user repos list).
 	 *
-	 * @param array $repos Array of repository info.
+	 * Detail page caches are not cleared here: they are replaced in place by
+	 * KGRD_Repo_Detail_Page::warm_cache() during the batch run.
 	 */
-	private function clear_output_cache_for_repos( $repos ) {
+	private function clear_rendered_output_cache() {
 		global $wpdb;
 
-		// Delete output transients that contain these repositories.
-		// Since we can't easily match specific repos, clear all output cache.
 		$wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s",
 				'_transient_kgrd_output_%',
-				'_transient_timeout_kgrd_output_%'
+				'_transient_timeout_kgrd_output_%',
+				'_transient_kgrd_user_repos_%',
+				'_transient_timeout_kgrd_user_repos_%'
 			)
 		);
 	}
@@ -254,12 +306,12 @@ class Kashiwazaki_GitHub_Repo_Display {
 	private function clear_all_cache() {
 		global $wpdb;
 
-		// Delete all transients with our prefix.
+		// Delete all transients with our prefix (output / API layer / user repos / detail).
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
-				'_transient_kgrd_repo_%',
-				'_transient_timeout_kgrd_repo_%'
+				'_transient_kgrd_%',
+				'_transient_timeout_kgrd_%'
 			)
 		);
 	}
